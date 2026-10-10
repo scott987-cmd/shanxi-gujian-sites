@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
-import { buildPagoda, type PagodaModel } from '@/three/pagoda'
+import { buildPagoda, buildGenericTower, type PagodaModel } from '@/three/pagoda'
 import { buildHall } from '@/three/hall'
 import { buildJoint, type JointModel } from '@/three/joint'
 import { buildEnvironment } from '@/three/env'
@@ -94,7 +94,7 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     scene.add(env)
 
     // 模型（按建筑类型选引擎）
-    const pagoda = config.archetype === 'pagoda' ? buildPagoda() : buildHall(config.hall!)
+    const pagoda = config.archetype === 'pagoda' ? buildPagoda() : config.archetype === 'tower' ? buildGenericTower(config.tower!.stories, config.tower!.glaze) : buildHall(config.hall!)
     scene.add(pagoda.group)
     const joint = buildJoint()
     joint.group.visible = false

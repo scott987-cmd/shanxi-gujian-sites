@@ -69,7 +69,8 @@ export interface BuildingConfig {
   alias: string
   seal: string // 印章字
   location: string
-  archetype: 'pagoda' | 'hall'
+  archetype: 'pagoda' | 'hall' | 'tower'
+  tower?: { stories: number; glaze: boolean }
   tagline: string
   heroStats: StatItem[]
   hall?: HallParams

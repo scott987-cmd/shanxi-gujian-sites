@@ -579,3 +579,131 @@ export function buildPagoda(): PagodaModel {
 
   return { group, layers, wallMats, fadeMats, radialParts, labelMats, totalHeight: cursor }
 }
+
+// ============ 通用多层塔（楼阁/密檐，任意层数） ============
+export function buildGenericTower(stories: number, glaze: boolean): PagodaModel {
+  const group = new THREE.Group()
+  const layers: BuiltLayer[] = []
+  const radialParts: RadialPart[] = []
+  const labelMats: THREE.SpriteMaterial[] = []
+
+  let cursor = 0
+  let index = 0
+  const push = (id: string, h: number, obj: THREE.Object3D) => {
+    obj.position.y = cursor
+    obj.userData.layerId = id
+    obj.traverse((o) => {
+      o.userData.layerId = id
+      if (o instanceof THREE.Mesh) {
+        o.castShadow = true
+        o.receiveShadow = true
+      }
+    })
+    group.add(obj)
+    layers.push({ id, obj, baseY: cursor, index, mats: [] })
+    cursor += h
+    index++
+  }
+  const addRadial = (mesh: THREE.Object3D, lift = 0) => {
+    const x = mesh.position.x
+    const z = mesh.position.z
+    const d = Math.hypot(x, z)
+    if (d < 0.01) return
+    radialParts.push({ mesh, dx: x / d, dz: z / d, amount: d * 0.55 + 0.6, baseX: x, baseY: mesh.position.y, baseZ: z, lift })
+  }
+
+  const roofCol = glaze ? 0x3a6a52 : COL.roof
+  const bodyCol = glaze ? 0xcbb59a : COL.wall
+  const woodCol = glaze ? 0x7d4a30 : COL.wood
+
+  // 台基
+  {
+    const g = new THREE.Group()
+    const m1 = mat(COL.stoneDark, 0.95)
+    const m2 = mat(COL.stone, 0.95)
+    const low = new THREE.Mesh(new THREE.BoxGeometry(26, 1.6, 26), m1)
+    low.position.y = 0.8
+    const up = new THREE.Mesh(octGeo(new THREE.CylinderGeometry(11.5, 12, 1.6, 8)), m2)
+    up.position.y = 2.4
+    g.add(low, up)
+    push('platform', 3.2, g)
+  }
+
+  const colGeo = new THREE.CylinderGeometry(0.22, 0.25, 3.0, 8)
+  for (let i = 1; i <= stories; i++) {
+    const t = (i - 1) / (stories - 1)
+    const R = 11 - t * 5.2 // 逐层收分
+    const colH = 3.0
+    // 柱架层
+    {
+      const g = new THREE.Group()
+      const mWood = mat(woodCol)
+      const mWall = mat(bodyCol, 0.9)
+      mWall.side = THREE.DoubleSide
+      for (const [x, z] of columnPositions(R)) {
+        const c = new THREE.Mesh(colGeo, mWood)
+        c.position.set(x, colH / 2, z)
+        g.add(c)
+        addRadial(c, 0.3)
+      }
+      const wall = new THREE.Mesh(octGeo(new THREE.CylinderGeometry(R * 0.96, R * 0.96, colH * 0.8, 8, 1, true)), mWall)
+      wall.position.y = colH * 0.48
+      g.add(wall)
+      g.add(new THREE.Mesh(ringBeams(R, colH - 0.15, 0.32, 0.4), mat(COL.woodDark)))
+      push(`t${i}-cols`, colH, g)
+    }
+    // 斗拱层
+    {
+      const g = new THREE.Group()
+      const mBr = mat(COL.bracket, 0.85)
+      const geo = bracketClusterGeo(0.85)
+      for (const c of clusterPositions(R + 0.2)) {
+        const m = new THREE.Mesh(geo, mBr)
+        m.position.set(c.x, 0, c.z)
+        m.rotation.y = c.ry
+        g.add(m)
+        addRadial(m, 0.8)
+      }
+      push(`t${i}-brackets`, 1.0, g)
+    }
+    // 檐层
+    {
+      const g = new THREE.Group()
+      const mRoof = mat(roofCol, 0.85, { side: THREE.DoubleSide })
+      const Reave = R + 2.4
+      const Rridge = Reave * 0.55
+      for (let k = 0; k < 8; k++) {
+        const face = new THREE.Mesh(roofFaceGeo(Rridge, Reave, 1.8, 0.4, k), mRoof)
+        face.position.y = 0.9
+        g.add(face)
+        const [mx, mz] = sideMid(Reave, k)
+        const d = Math.hypot(mx, mz)
+        radialParts.push({ mesh: face, dx: mx / d, dz: mz / d, amount: Reave * 0.3 + 0.6, baseX: 0, baseY: 0.9, baseZ: 0, lift: 0.5 })
+      }
+      const cap = new THREE.Mesh(octGeo(new THREE.CylinderGeometry(Rridge + 0.1, Rridge + 0.1, 0.12, 8)), mat(COL.roofRidge, 0.9))
+      cap.position.y = 1.75
+      g.add(cap)
+      push(`t${i}-eave`, 1.8, g)
+    }
+  }
+  // 塔刹
+  {
+    const g = new THREE.Group()
+    const mF = mat(glaze ? 0xc9a227 : COL.finial, 0.5, { metalness: 0.5 })
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.16, 6, 8), mF)
+    pole.position.y = 3
+    g.add(pole)
+    for (let i = 0; i < 5; i++) {
+      const ring = new THREE.Mesh(new THREE.TorusGeometry(0.85 - i * 0.12, 0.07, 6, 14), mF)
+      ring.rotation.x = Math.PI / 2
+      ring.position.y = 1.8 + i * 0.6
+      g.add(ring)
+    }
+    const jewel = new THREE.Mesh(new THREE.SphereGeometry(0.32, 10, 8), mat(0xa63d2a, 0.4, { metalness: 0.3 }))
+    jewel.position.y = 5.6
+    g.add(jewel)
+    push('finial', 6, g)
+  }
+
+  return { group, layers, wallMats: [], fadeMats: [], radialParts, labelMats, totalHeight: cursor }
+}
