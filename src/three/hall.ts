@@ -4,6 +4,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import type { PagodaModel, BuiltLayer, RadialPart } from './pagoda'
 import type { HallParams } from '@/sites/types'
 import { plaqueMesh, buddhaGeo } from './pagoda'
+import { tileTex, woodTex, plasterTex, latticeTex } from './textures'
 
 const COL = {
   wood: 0x8a5a35,
@@ -43,6 +44,13 @@ function clusterGeo(s: number): THREE.BufferGeometry {
   }
   add(0.26 * s, 0.24 * s, 2.5 * s, 0, 1.02 * s, 0.36 * s)
   add(2.15 * s, 0.24 * s, 0.28 * s, 0, 1.5 * s, 0.72 * s)
+  // 斜昂：杠杆式斜构件
+  {
+    const ang = new THREE.BoxGeometry(0.3 * s, 0.34 * s, 2.2 * s)
+    ang.rotateX(-0.34)
+    ang.translate(0, 1.62 * s, 0.5 * s)
+    boxes.push(ang)
+  }
   add(2.5 * s, 0.3 * s, 0.32 * s, 0, 1.78 * s, 0.72 * s)
   const geo = mergeGeometries(boxes)!
   clusterCache.set(key, geo)
@@ -60,7 +68,10 @@ function roofFace(
 ): THREE.BufferGeometry {
   const NR = 4
   const NA = 4
+  const faceW = botA.distanceTo(botB)
+  const slopeL = Math.max(1, topA.clone().lerp(topB, 0.5).distanceTo(botA.clone().lerp(botB, 0.5)))
   const pos: number[] = []
+  const uvArr: number[] = []
   const idx: number[] = []
   for (let r = 0; r <= NR; r++) {
     const t = r / NR
@@ -71,6 +82,7 @@ function roofFace(
       const p = top.lerp(bot, t)
       const lift = (upA + (upB - upA) * u) * Math.pow(t, 1.7)
       pos.push(p.x, p.y + lift, p.z)
+      uvArr.push(u * (faceW / 2.4), t * (slopeL / 2.4))
     }
   }
   for (let r = 0; r < NR; r++) {
@@ -82,10 +94,30 @@ function roofFace(
   }
   const g = new THREE.BufferGeometry()
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
-  g.setAttribute('uv', new THREE.Float32BufferAttribute(new Float32Array((pos.length / 3) * 2), 2))
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uvArr, 2))
   g.setIndex(idx)
   g.computeVertexNormals()
   return g
+}
+
+// 檐下椽条（矩形面）
+function rafterRow(width: number, y1: number, z1: number, y2: number, z2: number): THREE.BufferGeometry {
+  const geos: THREE.BufferGeometry[] = []
+  const n = Math.max(8, Math.round(width / 0.75))
+  for (let i = 0; i <= n; i++) {
+    const x = -width / 2 + (width * i) / n
+    const p1 = new THREE.Vector3(x, y1, z1)
+    const p2 = new THREE.Vector3(x, y2, z2)
+    const dir = new THREE.Vector3().subVectors(p2, p1)
+    const g = new THREE.CylinderGeometry(0.055, 0.055, dir.length(), 4)
+    const m = new THREE.Mesh(g)
+    m.position.copy(p1).addScaledVector(dir, 0.5)
+    m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize())
+    m.updateMatrix()
+    g.applyMatrix4(m.matrix)
+    geos.push(g)
+  }
+  return mergeGeometries(geos)!
 }
 
 function ridgeBeam(p1: THREE.Vector3, p2: THREE.Vector3, r: number): THREE.BufferGeometry {
@@ -197,8 +229,11 @@ export function buildHall(cfg: HallParams): PagodaModel {
     {
       const g = new THREE.Group()
       const mWood = mat(COL.wood)
+      mWood.map = woodTex()
       const mWall = mat(COL.wall, 0.9)
+      mWall.map = plasterTex()
       const mBeam = mat(COL.woodDark)
+      mBeam.map = woodTex()
       const colGeo = new THREE.CylinderGeometry(0.3, 0.33, ch, 8)
       const perim: [number, number][] = []
       for (let i = 0; i <= cfg.bays; i++) {
@@ -255,7 +290,8 @@ export function buildHall(cfg: HallParams): PagodaModel {
         const sideW = (Wl - 4.4) / 2
         mkWall(sideW, ch * 0.82, -(Wl / 4 + 1.1), Dl / 2, 0)
         mkWall(sideW, ch * 0.82, Wl / 4 + 1.1, Dl / 2, 0)
-        const mDoor = mat(0x241c14, 1)
+        const mDoor = new THREE.MeshStandardMaterial({ map: latticeTex(2, 2), roughness: 0.85 })
+        mDoor.transparent = true
         fadeMats.push(mDoor)
         const door = new THREE.Mesh(new THREE.PlaneGeometry(4.4, ch * 0.6), mDoor)
         door.position.set(0, ch * 0.3 + 0.4, Dl / 2 + 0.01)
@@ -387,7 +423,10 @@ export function buildHall(cfg: HallParams): PagodaModel {
   const upturn = 0.7
   {
     const g = new THREE.Group()
-    const mRoof = mat(COL.roof, 0.92, { side: THREE.DoubleSide })
+    const mRoof = mat(0xececec, 0.92, { side: THREE.DoubleSide })
+    mRoof.map = tileTex()
+    mRoof.bumpMap = tileTex()
+    mRoof.bumpScale = 0.4
     const y0 = roofH
     const faces: { geo: THREE.BufferGeometry; nx: number; nz: number }[] = []
     const mk = (a: THREE.Vector3, b: THREE.Vector3, c: THREE.Vector3, d: THREE.Vector3, nx: number, nz: number) => {
@@ -415,6 +454,20 @@ export function buildHall(cfg: HallParams): PagodaModel {
       g.add(mesh)
       radialParts.push({ mesh, dx: f.nx, dz: f.nz, amount: 2.6, baseX: 0, baseY: 0, baseZ: 0, lift: 0.8 })
     }
+    // 前后檐椽条
+    const mRafter = mat(COL.woodDark, 0.9, { transparent: true })
+    fadeMats.push(mRafter)
+    const rafterGeos: THREE.BufferGeometry[] = []
+    rafterGeos.push(rafterRow(Wr, 0.3, eaveD - 1.7, 0.0, eaveD + 0.2))
+    rafterGeos.push(rafterRow(Wr, 0.3, -eaveD + 1.7, 0.0, -eaveD - 0.2))
+    if (cfg.roof !== 'xuanshan') {
+      const side1 = rafterRow(Dr, 0.3, eaveW - 1.7, 0.0, eaveW + 0.2)
+      side1.rotateY(Math.PI / 2)
+      const side2 = rafterRow(Dr, 0.3, eaveW - 1.7, 0.0, eaveW + 0.2)
+      side2.rotateY(-Math.PI / 2)
+      rafterGeos.push(side1, side2)
+    }
+    g.add(new THREE.Mesh(mergeGeometries(rafterGeos)!, mRafter))
     // 重檐下檐环（单层殿用）
     if (cfg.doubleEave && floors === 1) {
       const mRoof2 = mRoof
@@ -441,6 +494,24 @@ export function buildHall(cfg: HallParams): PagodaModel {
         ridges.push(
           ridgeBeam(new THREE.Vector3((sx * ridgeLen) / 2, 0.1, 0), new THREE.Vector3(sx * eaveW * 0.98, -roofH + upturn * 1.2, sz * eaveD * 0.98), 0.18),
         )
+      }
+    }
+    // 垂脊走兽队列
+    if (cfg.roof !== 'xuanshan') {
+      for (const [sx, sz] of [
+        [1, 1],
+        [1, -1],
+        [-1, 1],
+        [-1, -1],
+      ] as const) {
+        const p1 = new THREE.Vector3((sx * ridgeLen) / 2, 0.1, 0)
+        const p2 = new THREE.Vector3(sx * eaveW * 0.98, -roofH + upturn * 1.2, sz * eaveD * 0.98)
+        for (let i = 1; i <= 5; i++) {
+          const p = p1.clone().lerp(p2, 0.45 + i * 0.1)
+          const beast = new THREE.ConeGeometry(0.14, 0.34, 5)
+          beast.translate(p.x, p.y + 0.28, p.z)
+          ridges.push(beast)
+        }
       }
     }
     g.add(new THREE.Mesh(mergeGeometries(ridges)!, mRidge))

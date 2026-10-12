@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import type { PagodaModel, BuiltLayer, RadialPart } from './pagoda'
 import { plaqueMesh } from './pagoda'
+import { rockTex, woodTex } from './textures'
 
 function mat(color: number, roughness = 0.9, opts: Partial<THREE.MeshStandardMaterialParameters> = {}) {
   return new THREE.MeshStandardMaterial({ color, roughness, metalness: 0.04, ...opts })
@@ -44,6 +45,9 @@ export function buildCliff(): PagodaModel {
   {
     const g = new THREE.Group()
     const mR = mat(ROCK)
+    mR.map = rockTex()
+    mR.bumpMap = rockTex()
+    mR.bumpScale = 0.6
     const geos: THREE.BufferGeometry[] = []
     // 主崖面（后壁）
     const main = new THREE.BoxGeometry(40, 34, 5)
@@ -76,6 +80,7 @@ export function buildCliff(): PagodaModel {
   {
     const g = new THREE.Group()
     const mB = mat(WOOD_D)
+    mB.map = woodTex()
     const beamGeos: THREE.BufferGeometry[] = []
     // 三层横梁，每层若干根：2/3 藏进崖壁、1/3 挑出
     const perLevel = [9, 9, 9]
@@ -99,6 +104,7 @@ export function buildCliff(): PagodaModel {
   {
     const g = new THREE.Group()
     const mP = mat(PLANK)
+    mP.map = woodTex()
     const deckGeos: THREE.BufferGeometry[] = []
     const widths = [26, 20, 13]
     LEVELS.forEach((y, li) => {

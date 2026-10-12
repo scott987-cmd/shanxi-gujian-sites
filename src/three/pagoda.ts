@@ -4,6 +4,7 @@ import * as THREE from 'three'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
 import { PAGODA_PARTS } from '@/data/pagoda'
 import { textSprite } from './joint'
+import { tileTex, woodTex, plasterTex, latticeTex } from './textures'
 
 export interface BuiltLayer {
   id: string
@@ -96,6 +97,13 @@ function bracketClusterGeo(s: number): THREE.BufferGeometry {
   // 第二跳 + 令栱 + 撩檐枋
   add(0.26 * s, 0.24 * s, 2.5 * s, 0, 1.02 * s, 0.36 * s)
   add(2.15 * s, 0.24 * s, 0.28 * s, 0, 1.5 * s, 0.72 * s)
+  // 斜昂：杠杆式斜构件
+  {
+    const ang = new THREE.BoxGeometry(0.3 * s, 0.34 * s, 2.2 * s)
+    ang.rotateX(-0.34)
+    ang.translate(0, 1.62 * s, 0.5 * s)
+    boxes.push(ang)
+  }
   add(2.5 * s, 0.3 * s, 0.32 * s, 0, 1.78 * s, 0.72 * s)
   const geo = mergeGeometries(boxes)!
   clusterCache.set(key, geo)
@@ -126,6 +134,7 @@ function roofFaceGeo(Rridge: number, Reave: number, h: number, upturn: number, k
   const NR = 4 // 径向分段
   const NA = 3 // 角向分段
   const pos: number[] = []
+  const uvArr: number[] = []
   const idx: number[] = []
   for (let r = 0; r <= NR; r++) {
     const t = r / NR // 0=脊 1=檐口
@@ -135,6 +144,7 @@ function roofFaceGeo(Rridge: number, Reave: number, h: number, upturn: number, k
       const corner = Math.abs(j / NA - 0.5) * 2 // 0=面中 1=角
       const y = h / 2 - t * h + upturn * Math.pow(t, 1.6) * Math.pow(corner, 2.2)
       pos.push(rad * Math.sin(a), y, rad * Math.cos(a))
+      uvArr.push((j / NA) * ((Reave * 0.85) / 2.4), t * (Math.hypot(Reave - Rridge, h) / 2.4))
     }
   }
   for (let r = 0; r < NR; r++) {
@@ -146,7 +156,7 @@ function roofFaceGeo(Rridge: number, Reave: number, h: number, upturn: number, k
   }
   const g = new THREE.BufferGeometry()
   g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3))
-  g.setAttribute('uv', new THREE.Float32BufferAttribute(new Float32Array((pos.length / 3) * 2), 2))
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uvArr, 2))
   g.setIndex(idx)
   g.computeVertexNormals()
   // 左角屋脊并入该面
@@ -363,6 +373,37 @@ function mezzanineGroup(R: number, h: number, mWood: THREE.Material, mRail: THRE
   return g
 }
 
+
+// 檐下椽子（环圈，散开时随 fadeMats 淡出）
+function rafterRing(Rridge: number, Reave: number, h: number, upturn: number): THREE.BufferGeometry {
+  const geos: THREE.BufferGeometry[] = []
+  for (let k = 0; k < 8; k++) {
+    for (let j = 0; j <= 8; j++) {
+      const a = (Math.PI / 4) * k - OROT + (Math.PI / 4) * (j / 8)
+      let dd = Infinity
+      for (let c = 0; c < 8; c++) {
+        const ca = (Math.PI / 4) * c - OROT
+        let d = Math.abs(a - ca) % (Math.PI * 2)
+        if (d > Math.PI) d = Math.PI * 2 - d
+        dd = Math.min(dd, d)
+      }
+      const corner = Math.max(0, 1 - dd / (Math.PI / 8))
+      const lift = upturn * Math.pow(corner, 2.2)
+      const p1 = new THREE.Vector3(Math.sin(a) * (Rridge + 0.4), h / 2 - h * 0.28, Math.cos(a) * (Rridge + 0.4))
+      const p2 = new THREE.Vector3(Math.sin(a) * (Reave + 0.25), -h / 2 + lift - 0.12, Math.cos(a) * (Reave + 0.25))
+      const dir = new THREE.Vector3().subVectors(p2, p1)
+      const g = new THREE.CylinderGeometry(0.055, 0.055, dir.length(), 4)
+      const m = new THREE.Mesh(g)
+      m.position.copy(p1).addScaledVector(dir, 0.5)
+      m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize())
+      m.updateMatrix()
+      g.applyMatrix4(m.matrix)
+      geos.push(g)
+    }
+  }
+  return mergeGeometries(geos)!
+}
+
 // ============ 主构建 ============
 export function buildPagoda(): PagodaModel {
   const group = new THREE.Group()
@@ -428,8 +469,11 @@ export function buildPagoda(): PagodaModel {
       const isVeranda = part.kind === 'veranda'
       const R = storyR[part.id]
       const mWood = mat(COL.wood)
+      mWood.map = woodTex()
       const mWall = mat(COL.wall, 0.9)
+      mWall.map = plasterTex()
       const mBeam = mat(COL.woodDark)
+      mBeam.map = woodTex()
       mats.push(mWood, mWall, mBeam)
       const h = part.h
       // 外槽柱：独立网格，可径向散开（散开时亮出编号）
@@ -475,7 +519,8 @@ export function buildPagoda(): PagodaModel {
         wallMats.push(mWall)
         fadeMats.push(mWall)
         if (part.id === 's1-cols') {
-          const mDoor = mat(0x241c14, 1)
+          const mDoor = new THREE.MeshStandardMaterial({ map: latticeTex(2, 2), roughness: 0.85 })
+          mDoor.transparent = true
           mats.push(mDoor)
           fadeMats.push(mDoor)
           const door = new THREE.Mesh(new THREE.PlaneGeometry(3.2, 4.2), mDoor)
@@ -524,7 +569,10 @@ export function buildPagoda(): PagodaModel {
       const Reave = part.w / 2
       const isSpire = part.id === 's5-eave'
       const Rridge = isSpire ? 0.4 : Reave * 0.58
-      const mRoof = mat(COL.roof, 0.92, { side: THREE.DoubleSide })
+      const mRoof = mat(0xececec, 0.92, { side: THREE.DoubleSide })
+      mRoof.map = tileTex()
+      mRoof.bumpMap = tileTex()
+      mRoof.bumpScale = 0.4
       mats.push(mRoof)
       // 八瓣屋面，散开时向外平移
       for (let k = 0; k < 8; k++) {
@@ -535,6 +583,13 @@ export function buildPagoda(): PagodaModel {
         const d = Math.hypot(mx, mz)
         radialParts.push({ mesh: face, dx: mx / d, dz: mz / d, amount: Reave * 0.3 + 0.8, baseX: 0, baseY: part.h / 2, baseZ: 0, lift: 0.6 })
       }
+      // 檐下椽子（环圈）
+      const mRafter = mat(COL.woodDark, 0.9, { transparent: true })
+      mats.push(mRafter)
+      fadeMats.push(mRafter)
+      const rafters = new THREE.Mesh(rafterRing(Rridge, Reave, part.h, isSpire ? 0.4 : 0.55), mRafter)
+      rafters.position.y = part.h / 2
+      g.add(rafters)
       if (!isSpire) {
         const mCap = mat(COL.roofRidge, 0.9, { transparent: true })
         mats.push(mCap)
@@ -670,6 +725,11 @@ export function buildGenericTower(stories: number, glaze: boolean): PagodaModel 
     {
       const g = new THREE.Group()
       const mRoof = mat(roofCol, 0.85, { side: THREE.DoubleSide })
+      if (!glaze) {
+        mRoof.map = tileTex()
+        mRoof.bumpMap = tileTex()
+        mRoof.bumpScale = 0.3
+      }
       const Reave = R + 2.4
       const Rridge = Reave * 0.55
       for (let k = 0; k < 8; k++) {
@@ -683,6 +743,9 @@ export function buildGenericTower(stories: number, glaze: boolean): PagodaModel 
       const cap = new THREE.Mesh(octGeo(new THREE.CylinderGeometry(Rridge + 0.1, Rridge + 0.1, 0.12, 8)), mat(COL.roofRidge, 0.9))
       cap.position.y = 1.75
       g.add(cap)
+      const rafters = new THREE.Mesh(rafterRing(Rridge, Reave, 1.8, 0.4), mat(COL.woodDark, 0.9))
+      rafters.position.y = 0.9
+      g.add(rafters)
       push(`t${i}-eave`, 1.8, g)
     }
   }
