@@ -10,7 +10,7 @@ import Legacy from '../sections/Legacy'
 const NAV = [
   { id: 'history', label: '沿革' },
   { id: 'explorer', label: '拆解' },
-  { id: 'dougong', label: '斗拱' },
+  { id: 'dougong', label: '精读' },
   { id: 'quake', label: '结构' },
   { id: 'legacy', label: '保护' },
 ]
@@ -55,7 +55,7 @@ export default function Site({ config }: { config: BuildingConfig }) {
       <Hero config={config} />
       <Timeline config={config} />
       <Explorer config={config} />
-      <BracketLab />
+      <BracketLab config={config} />
       <AntiQuake config={config} />
       <Legacy config={config} />
 

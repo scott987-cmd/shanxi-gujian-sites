@@ -59,6 +59,11 @@ export const bianjinglou: BuildingConfig = {
   plaquesIntro: '两块八米巨匾一南一北，字大如斗，是书写在空中的边塞史诗。',
   planTitle: '楼面平面 · 七间三层',
   planZones: [],
+  signature: {
+    title: '楼阁斗拱', sub: '三层四滴水 · 明代官式', visual: 'dougong',
+    desc: '边靖楼三层四层檐，每层檐下都是一圈明代官式斗拱。楼阁斗拱比殿堂更密、更整饬，承托层层飞檐。',
+    stats: [['三层', '楼阁'], ['四重', '檐口'], ['明官式', '铺作']],
+  },
   legacy: { status: '边靖楼保存完好，可登楼远眺。巨匾与木构定期养护。', digital: '全楼三维建档完成，巨匾完成高清影像采集。' },
 }
 
@@ -115,6 +120,11 @@ export const tiantaian: BuildingConfig = {
   plaquesIntro: '中国古建筑史上最著名的“翻案”之一，就发生在这座三间小庵的屋脊下。',
   planTitle: '小殿平面 · 三间见方',
   planZones: [],
+  signature: {
+    title: '五代斗拱', sub: '唐风犹存 · 断代现场', visual: 'dougong',
+    desc: '天台庵斗拱简洁雄大、唐风十足，正是它“骗过”了几代学者。直到梁架题记出土，才把它从唐代名单移到五代。',
+    stats: [['五代', '后唐长兴四年'], ['唐风', '形制'], ['题记', '断代铁证']],
+  },
   legacy: { status: '2015 年大修后保存良好，题记已做影像与拓片存档。', digital: '题记高清扫描存档，河谷古建群统一数字建档。' },
 }
 
@@ -170,6 +180,11 @@ export const dayunyuan: BuildingConfig = {
   plaquesIntro: '五代壁画在寺观建筑中仅此一处——大云院的墙壁，是五代画史的唯一现场。',
   planTitle: '大殿平面 · 普拍枋圈梁',
   planZones: [],
+  signature: {
+    title: '普拍枋与斗拱', sub: '最早的“圈梁”', visual: 'dougong',
+    desc: '大云院柱头之上先横置一道普拍枋，再承斗拱——所有柱头被箍成一圈整体。这一构件后来被写进《营造法式》，成为后世标配。',
+    stats: [['普拍枋', '最早用例'], ['五代', '后晋'], ['法式', '后世标配']],
+  },
   legacy: { status: '大殿与壁画保存良好，壁画区域严格控制光照与湿度。', digital: '五代壁画完成高精度数字化，色彩档案永久保存。' },
 }
 
@@ -227,6 +242,11 @@ export const longmensi: BuildingConfig = {
   plaquesIntro: '不用翻书，走进龙门寺，六代的梁柱自己开口说话。',
   planTitle: '大殿平面 · 北宋规制',
   planZones: [],
+  signature: {
+    title: '六朝斗拱对照', sub: '一部活的铺作演变史', visual: 'dougong',
+    desc: '同一座寺院里并存五代、宋、金、元、明、清的斗拱——雄大到纤巧、结构到装饰，走进龙门寺就能逐代比对。',
+    stats: [['六朝', '铺作并存'], ['五代', '西配殿'], ['宋', '大雄宝殿']],
+  },
   legacy: { status: '六朝建筑均保存完好，寺院整体纳入河谷古建群保护体系。', digital: '全寺各时代建筑分别三维建档，六朝做法可在线比对研究。' },
 }
 
@@ -282,6 +302,18 @@ export const chongqingsi: BuildingConfig = {
   plaquesIntro: '宋代的雕塑家不再塑“神”，而是塑“人”——十八罗汉里有老者、有行者、有你邻家的叔伯。',
   planTitle: '大殿平面 · 北宋三间殿',
   planZones: [],
+  signature: {
+    title: '宋塑十八罗汉', sub: '写实主义的巅峰', visual: 'sculptures',
+    desc: '三大士殿十八罗汉，每一尊都是一个有血肉的“人”。点击造像细看。',
+    stats: [['18 尊', '宋代罗汉'], ['北宋', '1016 年'], ['写实', '巅峰']],
+    items: [
+      { name: '长眉罗汉', desc: '长眉垂颊，慈祥中见威严。' },
+      { name: '降龙罗汉', desc: '肌肉紧绷，气势逼人。' },
+      { name: '沉思罗汉', desc: '低眉敛目，若有所思。' },
+      { name: '伏虎罗汉', desc: '手抚猛虎，驯悍有力。' },
+      { name: '笑狮罗汉', desc: '开口欲笑，憨态可掬。' },
+    ],
+  },
   legacy: { status: '殿宇与宋塑保存良好，彩塑限流观赏。', digital: '十八罗汉逐尊三维扫描，表情细节永久存档。' },
 }
 
@@ -342,6 +374,18 @@ export const faxingsi: BuildingConfig = {
   plaquesIntro: '唐代的石头、宋代的木头和泥巴，一起搬到新山继续站立——文物搬迁史上的又一课。',
   planTitle: '大殿平面 · 三间六椽',
   planZones: [],
+  signature: {
+    title: '十二圆觉彩塑', sub: '宋塑的人性化瞬间', visual: 'sculptures',
+    desc: '圆觉殿内十二圆觉菩萨环列，丰腴端庄、神情各异。点击造像细看。',
+    stats: [['12 尊', '圆觉菩萨'], ['北宋', '1084 年'], ['唐塔', '寺内还有']],
+    items: [
+      { name: '文殊师利', desc: '十二圆觉之首，智慧化身。' },
+      { name: '普贤', desc: '行愿菩萨，仪态雍容。' },
+      { name: '观音', desc: '慈悲垂目，衣纹如水。' },
+      { name: '金刚藏', desc: '刚毅内敛，护持正法。' },
+      { name: '弥勒', desc: '未来佛相，和煦安然。' },
+    ],
+  },
   legacy: { status: '迁建后保存良好，十二圆觉宋塑与唐代石构均实施监测。', digital: '迁建档案与三维模型完整存档，成为古建搬迁的教学样本。' },
 }
 
@@ -398,6 +442,17 @@ export const qingliansi: BuildingConfig = {
   plaquesIntro: '唐代的佛坐在下院，宋代的殿立在上院——青莲寺的台阶就是时间的台阶。',
   planTitle: '大殿平面 · 北宋三间殿',
   planZones: [],
+  signature: {
+    title: '唐代垂腿弥勒', sub: '现存最早的垂腿坐佛之一', visual: 'sculptures',
+    desc: '古青莲寺唐塑六尊，垂腿而坐的弥勒开创了后世弥勒造像的新姿势。点击造像细看。',
+    stats: [['6 尊', '唐代彩塑'], ['垂腿', '最早实例'], ['宋构', '上院释迦殿']],
+    items: [
+      { name: '垂腿弥勒', desc: '双腿垂坐而非结跏趺坐——弥勒造像史上最早的新姿势之一。' },
+      { name: '释迦牟尼', desc: '主尊唐塑，面相饱满。' },
+      { name: '胁侍菩萨', desc: '身姿微倾，唐韵丰腴。' },
+      { name: '供养菩萨', desc: '蹲跪供奉，虔敬生动。' },
+    ],
+  },
   legacy: { status: '唐宋遗物保存良好，两院均开放，彩塑区域限流。', digital: '唐塑宋构三维建档，山寺环境监测常态化。' },
 }
 
@@ -458,5 +513,10 @@ export const yuhuangmiao: BuildingConfig = {
   plaquesIntro: '刘銮在七百年前完成的这组群像，至今仍是中国雕塑史上想象力与写实功力结合的最佳现场。',
   planTitle: '大殿平面 · 宋构三间',
   planZones: [],
+  signature: {
+    title: '二十八星宿', sub: '元代刘銮 · 星座变成人', visual: 'stars',
+    desc: '角木蛟、亢金龙、室火猪……点击任意星宿。二十八尊元代彩塑把抽象星象翻译成二十八个性格迥异的人，《黑神话：悟空》在此取景。',
+    stats: [['28 尊', '元代彩塑'], ['刘銮', '雕塑大师'], ['四象', '青龙玄武白虎朱雀']],
+  },
   legacy: { status: '二十八宿彩塑保存良好，预约限流参观；玉皇殿宋构稳定。', digital: '二十八宿逐尊三维建档，数字分身已用于线上展示与游戏联动。' },
 }

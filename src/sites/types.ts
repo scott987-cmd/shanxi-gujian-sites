@@ -64,6 +64,15 @@ export interface LegacyInfo {
   digital: string // 数字化保护
 }
 
+export interface SignatureInfo {
+  title: string
+  sub: string
+  desc: string
+  visual: 'dougong' | 'beams' | 'glaze' | 'stars' | 'sculptures' | 'mural' | 'bridge' | 'shelf'
+  stats: [string, string][]
+  items?: { name: string; desc: string }[]
+}
+
 export interface BuildingConfig {
   id: string
   name: string
@@ -86,4 +95,5 @@ export interface BuildingConfig {
   planTitle: string
   planZones: PlanZone[]
   legacy: LegacyInfo
+  signature: SignatureInfo
 }
