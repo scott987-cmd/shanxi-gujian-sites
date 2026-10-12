@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { buildPagoda, buildGenericTower, type PagodaModel } from '@/three/pagoda'
 import { buildHall } from '@/three/hall'
+import { buildCliff } from '@/three/cliff'
 import { buildJoint, type JointModel } from '@/three/joint'
 import { buildEnvironment } from '@/three/env'
 import type { BuildingConfig } from '@/sites/types'
@@ -94,7 +95,7 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     scene.add(env)
 
     // 模型（按建筑类型选引擎）
-    const pagoda = config.archetype === 'pagoda' ? buildPagoda() : config.archetype === 'tower' ? buildGenericTower(config.tower!.stories, config.tower!.glaze) : buildHall(config.hall!)
+    const pagoda = config.archetype === 'pagoda' ? buildPagoda() : config.archetype === 'tower' ? buildGenericTower(config.tower!.stories, config.tower!.glaze) : config.archetype === 'cliff' ? buildCliff() : buildHall(config.hall!)
     scene.add(pagoda.group)
     const joint = buildJoint()
     joint.group.visible = false
@@ -115,6 +116,11 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
       scaleK: Math.min(0.8, Math.max(0.25, (spacing * (n - 1)) / dist)),
       spreadK: 0.3,
       baseY: size.y * 0.42,
+    }
+    if (config.archetype === 'cliff') {
+      cam.pos.set(8, 17, 40)
+      cam.tgt.set(0, 13, 0)
+      cam.baseY = 13
     }
     camera.position.copy(cam.pos)
     controls.target.copy(cam.tgt)

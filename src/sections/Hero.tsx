@@ -27,7 +27,7 @@ export default function Hero({ config }: { config: BuildingConfig }) {
       {/* 背景剪影 */}
       <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[46%] items-center justify-center opacity-45 md:flex">
         <div className="w-full max-w-[520px]">
-          {config.archetype === 'pagoda' ? (
+          {(config.archetype === 'pagoda' || config.archetype === 'tower') ? (
             <PagodaSVG explode={0} mode="explode" activeSystem={null} selectedId={null} onSelect={() => {}} />
           ) : (
             <HallSilhouette doubleEave={config.hall?.doubleEave ?? false} />

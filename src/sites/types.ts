@@ -53,6 +53,7 @@ export interface HallParams {
   doubleEave: boolean
   innerColRows: number // 内槽金柱排数（示意）
   bracketSize: number // 斗拱尺度系数
+  floors?: number // 楼阁层数（默认 1）
   statues: { x: number; z: number; s: number; ry?: number }[]
   plaqueTexts: string[] // 明间正中大匾
 }
@@ -69,7 +70,7 @@ export interface BuildingConfig {
   alias: string
   seal: string // 印章字
   location: string
-  archetype: 'pagoda' | 'hall' | 'tower'
+  archetype: 'pagoda' | 'hall' | 'tower' | 'cliff'
   tower?: { stories: number; glaze: boolean }
   tagline: string
   heroStats: StatItem[]

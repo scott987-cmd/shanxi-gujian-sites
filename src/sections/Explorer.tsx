@@ -4,6 +4,8 @@ import type { BuildingConfig } from '@/sites/types'
 import PagodaCanvas from '@/components/PagodaCanvas'
 import PlanView, { PLAN_INFO } from '@/components/PlanView'
 import HallPlan from '@/components/HallPlan'
+import TowerPlan from '@/components/TowerPlan'
+import CliffSection from '@/components/CliffSection'
 import { Slider } from '@/components/ui/slider'
 
 type Mode = 'pagoda' | 'joint' | 'plan'
@@ -64,7 +66,22 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
     { name: '叉柱造（右）', items: JOINT_PARTS.filter((j) => j.group === '叉柱造（右）') },
   ]
 
-  const planZones = config.archetype === 'pagoda' ? PLAN_INFO : HALL_PLAN_ZONES
+  const TOWER_PLAN_ZONES = [
+    { id: 'wall', title: '琉璃外壁', desc: '外壁满贴琉璃构件：佛龛、菩萨、花卉、祥兽，釉彩五百年不褪。' },
+    { id: 'core', title: '砖砌内筒', desc: '厚壁砖筒承压承重，是高层砖塔的结构主体。' },
+    { id: 'stairs', title: '登塔梯道', desc: '梯道绕内壁盘旋而上，今已禁止登临。' },
+    { id: 'core-room', title: '塔心室', desc: '塔心供奉佛像，各层均有龛室。' },
+    { id: 'door', title: '塔门（南）', desc: '塔坐北朝南，南面开门。' },
+  ]
+  const CLIFF_PLAN_ZONES = [
+    { id: 'cliff', title: '翠屏峰崖壁', desc: '凹进的崖壁为寺院遮雨挡风，岩体自重是全部结构的地基。' },
+    { id: 'beams', title: '悬臂横梁 ×27', desc: '横梁三分之二插入崖壁、三分之一挑出，全寺殿阁都建在这组悬臂梁上。' },
+    { id: 'decks', title: '平台栈道', desc: '横梁之上铺设平台与栈道，连接各殿阁。' },
+    { id: 'halls', title: '凌空殿阁', desc: '四十余间殿阁错落有致地挂在平台之上。' },
+    { id: 'posts', title: '立木', desc: '垂在平台下的立木其实多不受力——真正承重的是看不见的横梁，立木更多是给登临者的心理安慰。' },
+  ]
+  const planZones =
+    config.archetype === 'pagoda' ? PLAN_INFO : config.archetype === 'tower' ? TOWER_PLAN_ZONES : config.archetype === 'cliff' ? CLIFF_PLAN_ZONES : HALL_PLAN_ZONES
   const planInfo = planZones.find((p) => p.id === planSel) ?? null
 
   const renderRow = (id: string, name: string, tag: string, color: string, desc: string, facts?: string[]) => {
@@ -139,6 +156,10 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
                 <div className="bg-[#f2ecdf] p-2">
                   {config.archetype === 'pagoda' ? (
                     <PlanView selected={planSel} onSelect={(id) => setPlanSel(id === planSel ? null : id)} />
+                  ) : config.archetype === 'tower' ? (
+                    <TowerPlan selected={planSel} onSelect={(id) => setPlanSel(id === planSel ? null : id)} />
+                  ) : config.archetype === 'cliff' ? (
+                    <CliffSection selected={planSel} onSelect={(id) => setPlanSel(id === planSel ? null : id)} />
                   ) : (
                     <HallPlan params={config.hall!} selected={planSel} onSelect={(id) => setPlanSel(id === planSel ? null : id)} />
                   )}
@@ -273,12 +294,26 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
                         ['八角', '平面形制'],
                         ['30.27m', '底层直径'],
                       ]
-                    : [
-                        [`${config.hall!.bays} 间`, '面阔'],
-                        [`${config.hall!.depthBays} 间`, '进深'],
-                        [config.hall!.roof === 'wudian' ? '庑殿' : config.hall!.roof === 'xieshan' ? '歇山' : '悬山', '屋顶形制'],
-                        [config.hall!.doubleEave ? '重檐' : '单檐', '屋檐'],
-                      ]
+                    : config.archetype === 'tower'
+                      ? [
+                          ['13', '层数'],
+                          ['八角', '平面'],
+                          ['琉璃', '通体'],
+                          ['47.31m', '塔高'],
+                        ]
+                      : config.archetype === 'cliff'
+                        ? [
+                            ['27', '悬臂横梁'],
+                            ['40', '殿阁（间）'],
+                            ['约60m', '凌空高度'],
+                            ['三层', '平台栈道'],
+                          ]
+                        : [
+                            [`${config.hall!.bays} 间`, '面阔'],
+                            [`${config.hall!.depthBays} 间`, '进深'],
+                            [config.hall!.roof === 'wudian' ? '庑殿' : config.hall!.roof === 'xieshan' ? '歇山' : '悬山', '屋顶形制'],
+                            [config.hall!.floors && config.hall!.floors > 1 ? `${config.hall!.floors} 层` : config.hall!.doubleEave ? '重檐' : '单檐', '层檐'],
+                          ]
                   ).map(([v, k]) => (
                     <div key={k} className="rounded-lg border border-[#4a4032] p-3">
                       <div className="font-serif-sc text-xl font-bold text-[#c9a227]">{v}</div>
