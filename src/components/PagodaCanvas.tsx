@@ -93,7 +93,7 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     scene.add(rim)
 
     // 环境
-    const env = buildEnvironment()
+    const env = buildEnvironment(config.archetype === 'cliff' ? 'mountain' : 'courtyard')
     scene.add(env)
 
     // 模型（按建筑类型选引擎）

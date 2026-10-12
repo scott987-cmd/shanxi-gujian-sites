@@ -97,6 +97,55 @@ function EraPagoda({ progress, active }: { progress: number; active: number }) {
   )
 }
 
+function EraHall({ progress, active }: { progress: number; active: number }) {
+  const build = Math.min(1, progress * 2.2)
+  const H = 140
+  const reveal = build * H
+  return (
+    <svg viewBox="0 0 100 150" className="h-[46vh] max-h-[380px] w-auto">
+      <defs>
+        <clipPath id="buildClipHall">
+          <rect x="0" y={H - reveal} width="100" height={reveal} style={{ transition: 'y 0.6s cubic-bezier(0.22,1,0.36,1), height 0.6s cubic-bezier(0.22,1,0.36,1)' }} />
+        </clipPath>
+      </defs>
+      <line x1="8" y1="140" x2="92" y2="140" stroke="#8a7f6a" strokeWidth="1.4" opacity="0.6" />
+      <g clipPath="url(#buildClipHall)">
+        {/* 台基 */}
+        <polygon points="22,140 78,140 74,132 26,132" fill="#9a8f7d" />
+        {/* 柱网 */}
+        {[30, 38, 46, 54, 62, 70].map((x) => (
+          <rect key={x} x={x - 1.4} y={104} width={2.8} height={28} fill="#7a4e2d" />
+        ))}
+        {/* 斗拱带 */}
+        <rect x="26" y="97" width="48" height="6" fill="#a37a4f" />
+        {/* 大屋顶 */}
+        <polygon points="16,96 84,96 70,78 30,78" fill="#46525c" />
+        <rect x="34" y="74" width="32" height="4.5" fill="#2f3841" />
+        <circle cx="33" cy="76" r="2.4" fill="#4a6a5a" />
+        <circle cx="67" cy="76" r="2.4" fill="#4a6a5a" />
+        {active === 6 && (
+          <g stroke="#7fb4c9" strokeWidth="0.4" opacity="0.55">
+            {[96, 112, 128].map((y) => (
+              <line key={y} x1="14" y1={y} x2="86" y2={y} strokeDasharray="3 2" />
+            ))}
+            {[34, 50, 66].map((x) => (
+              <line key={x} x1={x} y1="70" x2={x} y2="140" strokeDasharray="3 2" />
+            ))}
+          </g>
+        )}
+        {active === 7 && <polyline points="38,100 45,108 40,116 47,124" fill="none" stroke="#e04c38" strokeWidth="1.4" />}
+      </g>
+      {active === 5 && (
+        <g fill="#8a7f6a">
+          <circle cx="30" cy="80" r="5" opacity="0.4" className="animate-ping" style={{ transformOrigin: '30px 80px', animationDuration: '2.2s' }} />
+          <circle cx="68" cy="66" r="4" opacity="0.35" className="animate-ping" style={{ transformOrigin: '68px 66px', animationDuration: '1.8s' }} />
+        </g>
+      )}
+      {active === 10 && <circle cx="50" cy="100" r="58" fill="none" stroke="#c9a227" strokeWidth="1" opacity="0.7" strokeDasharray="5 4" className="animate-spin" style={{ transformOrigin: '50px 100px', animationDuration: '24s' }} />}
+    </svg>
+  )
+}
+
 export default function Timeline({ config }: { config: BuildingConfig }) {
   const TIMELINE = config.timeline
   const secRef = useRef<HTMLDivElement>(null)
@@ -180,7 +229,11 @@ export default function Timeline({ config }: { config: BuildingConfig }) {
           </div>
 
           <div className="hidden md:order-2 md:block">
-            <EraPagoda progress={progress} active={active} />
+            {config.archetype === 'hall' || config.archetype === 'cliff' ? (
+              <EraHall progress={progress} active={active} />
+            ) : (
+              <EraPagoda progress={progress} active={active} />
+            )}
           </div>
 
           {/* 进度轨 */}

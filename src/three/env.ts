@@ -6,7 +6,74 @@ function m(color: number, roughness = 0.95) {
   return new THREE.MeshStandardMaterial({ color, roughness })
 }
 
-export function buildEnvironment(): THREE.Group {
+export function buildEnvironment(kind: 'courtyard' | 'mountain' = 'courtyard'): THREE.Group {
+  return kind === 'mountain' ? buildMountain() : buildCourtyard()
+}
+
+function buildMountain(): THREE.Group {
+  const g = new THREE.Group()
+  // 山谷地貌
+  const terrain = new THREE.Mesh(new THREE.CircleGeometry(340, 48), m(0x3a3f2e))
+  terrain.rotation.x = -Math.PI / 2
+  terrain.position.y = -0.05
+  terrain.receiveShadow = true
+  g.add(terrain)
+  // 谷地溪流滩
+  const bed = new THREE.Mesh(new THREE.BoxGeometry(120, 0.1, 26), m(0x4c4a3c))
+  bed.position.set(0, 0.02, 26)
+  g.add(bed)
+  // 近处山岩
+  const rockMat = m(0x55483c, 1)
+  const rocks: [number, number, number, number][] = [
+    [-30, 14, 7, 4],
+    [26, 18, 5, 3],
+    [-22, 30, 4, 2.4],
+  ]
+  for (const [x, z, r, h] of rocks) {
+    const rk = new THREE.Mesh(new THREE.ConeGeometry(r, h, 7), rockMat)
+    rk.position.set(x, h / 2 - 0.2, z)
+    rk.castShadow = true
+    g.add(rk)
+  }
+  // 山松
+  const trunkGeos: THREE.BufferGeometry[] = []
+  const crownGeos: THREE.BufferGeometry[] = []
+  const spots: [number, number, number][] = [[-36, 8, 5], [34, 6, 4.4], [-30, 26, 3.8], [38, 24, 4.6], [-14, 34, 3.4], [18, 36, 3.8]]
+  for (const [x, z, h] of spots) {
+    const trunk = new THREE.CylinderGeometry(0.16, 0.24, h * 0.4, 5)
+    trunk.translate(x, h * 0.2, z)
+    trunkGeos.push(trunk)
+    const c1 = new THREE.ConeGeometry(h * 0.42, h * 0.55, 7)
+    c1.translate(x, h * 0.62, z)
+    const c2 = new THREE.ConeGeometry(h * 0.28, h * 0.42, 7)
+    c2.translate(x, h * 0.92, z)
+    crownGeos.push(c1, c2)
+  }
+  const trunks = new THREE.Mesh(mergeGeometries(trunkGeos)!, m(0x4a3524))
+  const crowns = new THREE.Mesh(mergeGeometries(crownGeos)!, m(0x2c4632))
+  trunks.castShadow = true
+  crowns.castShadow = true
+  g.add(trunks, crowns)
+  // 远山
+  const hillMat = m(0x2b3138, 1)
+  const hills: [number, number, number, number][] = [
+    [-120, -160, 140, 60],
+    [60, -200, 170, 75],
+    [200, -120, 120, 55],
+    [-220, -40, 130, 50],
+    [230, 60, 150, 48],
+    [-90, 140, 110, 36],
+  ]
+  const hillGeos = hills.map(([x, z, r, h]) => {
+    const hg = new THREE.ConeGeometry(r, h, 24)
+    hg.translate(x, h / 2 - 1, z)
+    return hg
+  })
+  g.add(new THREE.Mesh(mergeGeometries(hillGeos)!, hillMat))
+  return g
+}
+
+function buildCourtyard(): THREE.Group {
   const g = new THREE.Group()
 
   // 大地（晋北高原黄昏）
