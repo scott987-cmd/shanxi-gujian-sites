@@ -7,6 +7,7 @@ export const yingxian: BuildingConfig = {
   alias: '佛宫寺释迦塔',
   seal: '辽',
   location: '山西朔州 · 应县',
+  geo: [113.19, 39.55, 0, 0],
   archetype: 'pagoda',
   tagline: '公元 1056 年，辽代工匠不施一钉一铆，以榫卯与斗拱在晋北高原立起一座 67 米的纯木巨塔。近千年风雨、数十次强震、两百余发炮弹，未能让它倒下。',
   heroStats: HERO_STATS,

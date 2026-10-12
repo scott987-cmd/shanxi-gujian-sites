@@ -79,6 +79,7 @@ export interface BuildingConfig {
   alias: string
   seal: string // 印章字
   location: string
+  geo?: [number, number, number, number] // 经度, 纬度, 偏移x, 偏移y（度）
   archetype: 'pagoda' | 'hall' | 'tower' | 'cliff'
   tower?: { stories: number; glaze: boolean }
   tagline: string

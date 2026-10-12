@@ -7,6 +7,7 @@ export const yonglegong: BuildingConfig = {
   alias: '《朝元图》与整体搬迁的奇迹',
   seal: '元',
   location: '山西运城 · 芮城县',
+  geo: [110.69, 34.69, 0, 0],
   archetype: 'hall',
   tagline:
     '元代全真教三大祖庭之一。三清殿四壁的《朝元图》以近三百位天神朝谒元始天尊，是中国壁画的巅峰。1959 年，为避让三门峡水库，整座宫殿群被逐块编号拆运、异地重建——世界文物保护史上罕见的整体搬迁。',
@@ -106,6 +107,7 @@ export const feihongta: BuildingConfig = {
   alias: '世界最高的多彩琉璃塔',
   seal: '明',
   location: '山西临汾 · 洪洞县广胜寺',
+  geo: [111.68, 36.29, 0, 0],
   archetype: 'tower',
   tower: { stories: 13, glaze: true },
   tagline:
@@ -161,6 +163,7 @@ export const shuanglinsi: BuildingConfig = {
   alias: '东方彩塑艺术宝库',
   seal: '塑',
   location: '山西晋中 · 平遥县',
+  geo: [112.19, 37.2, -0.08, 0.04],
   archetype: 'hall',
   tagline:
     '平遥城外的双林寺，十座殿宇里住着两千余尊彩塑。千手观音慈悲低垂，韦驮将军扭身怒目——被行家称为“天下第一韦驮”。这里的木头是骨架，泥巴才是灵魂。',
@@ -249,6 +252,7 @@ export const zhenguosi: BuildingConfig = {
   alias: '五代木构 · 乱世幸存者',
   seal: '五代',
   location: '山西晋中 · 平遥县',
+  geo: [112.24, 37.24, 0.08, -0.04],
   archetype: 'hall',
   tagline:
     '公元 963 年，五代十国的乱世里，北汉小国在平遥城外建起这座佛殿。它没有唐代前辈的名气，却是中国现存最古老的木构之一——殿内十一尊五代彩塑，是敦煌之外仅存的五代寺观彩塑。',
@@ -327,6 +331,7 @@ export const chongfusi: BuildingConfig = {
   alias: '金代巨殿 · 五绝同殿',
   seal: '金',
   location: '山西朔州 · 朔城区',
+  geo: [112.43, 39.31, 0, 0],
   archetype: 'hall',
   tagline:
     '金皇统三年（1143 年）建成的弥陀殿，面阔七间 41 米，与八百年前相比几乎未变。琉璃脊饰、菱花门窗、金代壁画、塑像与匾额同殿共存，被称为“崇福五绝”——一座殿就是一部金代艺术全集。',

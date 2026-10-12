@@ -1,4 +1,5 @@
 import { SITES } from '../sites'
+import ShanxiMap from '../components/ShanxiMap'
 
 export default function Gallery() {
   return (
@@ -14,7 +15,12 @@ export default function Gallery() {
           滚动穿越千年历史，亲手把建筑拆成每一根木头。
         </p>
 
-        <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-14 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]">
+          <div className="lg:sticky lg:top-20">
+            <h2 className="font-serif-sc mb-4 text-2xl font-bold text-[#e8dcb8]">晋地二十遗珍分布图</h2>
+            <ShanxiMap />
+          </div>
+          <div className="grid gap-5 sm:grid-cols-2">
           {SITES.map((s, i) => (
             <a
               key={s.id}
@@ -39,6 +45,7 @@ export default function Gallery() {
               <div className="mt-4 text-xs text-[#c9a227] opacity-0 transition group-hover:opacity-100">进入站点 →</div>
             </a>
           ))}
+          </div>
         </div>
 
         <footer className="mt-16 border-t border-[#4a4032] pt-8 text-center text-xs text-[#6b5f4c]">
