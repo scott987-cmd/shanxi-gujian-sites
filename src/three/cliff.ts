@@ -89,7 +89,8 @@ export function buildCliff(): PagodaModel {
       for (let i = 0; i < n; i++) {
         const x = -14 + (28 / (n - 1)) * i + (li % 2) * 0.8
         const b = new THREE.BoxGeometry(0.42, 0.38, 12)
-        b.translate(x, y, -3.2)
+        b.rotateX(0.08) // 斜插：崖内端高、崖外端低
+        b.translate(x, y + 0.4, -3.2)
         beamGeos.push(b)
       }
     })
@@ -143,8 +144,8 @@ export function buildCliff(): PagodaModel {
     const postGeos: THREE.BufferGeometry[] = []
     LEVELS.forEach((y) => {
       for (const x of [-11, -5, 1, 7, 12]) {
-        const p = new THREE.CylinderGeometry(0.12, 0.12, 5.5, 6)
-        p.translate(x, y - 2.6, 2.6)
+        const p = new THREE.CylinderGeometry(0.11, 0.11, 2.1, 6) // 短柱垂吊，下端悬空
+        p.translate(x, y - 1.25, 2.6)
         postGeos.push(p)
       }
     })

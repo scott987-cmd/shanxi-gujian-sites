@@ -18,12 +18,12 @@ export default function CliffSection({ selected, onSelect }: { selected: string 
         {[140, 210, 280].map((y, i) => (
           <g key={i}>
             {[0, 1, 2].map((j) => (
-              <rect key={j} x={180} y={y + j * 14} width={180} height={9} fill={hl('beams') ? '#a63d2a' : '#66422a'} stroke="#3d2716" strokeWidth={0.8} />
+              <rect key={j} x={180} y={y + j * 14} width={180} height={9} fill={hl('beams') ? '#a63d2a' : '#66422a'} stroke="#3d2716" strokeWidth={0.8} transform={`rotate(-3.5 180 ${y + j * 14})`} />
             ))}
           </g>
         ))}
         <text x={380} y={180} fontSize={12} fill="#a63d2a" className="font-serif-sc">悬臂横梁 ×27</text>
-        <text x={380} y={196} fontSize={10} fill="#8a7f6a" className="font-serif-sc">三分之二插入崖壁</text>
+        <text x={380} y={196} fontSize={10} fill="#8a7f6a" className="font-serif-sc">斜向上插入崖壁 · 楔紧自锁</text>
         {/* 杠杆示意 */}
         <line x1={180} y1={320} x2={360} y2={320} stroke="#c9a227" strokeWidth={1.2} strokeDasharray="5 3" />
         <path d="M250 320 l-8 -6 v12 Z" fill="#c9a227" />
