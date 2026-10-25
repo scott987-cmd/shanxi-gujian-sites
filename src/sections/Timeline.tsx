@@ -146,6 +146,20 @@ function EraHall({ progress, active }: { progress: number; active: number }) {
   )
 }
 
+
+// 年代事件 → 场景图
+function sceneOf(title: string, desc: string): string {
+  const s = title + desc
+  if (/炮|战火|硝烟|军阀/.test(s)) return 'war'
+  if (/地震|强震/.test(s)) return 'quake'
+  if (/测绘|梁思成|林徽因|营造学社/.test(s)) return 'survey'
+  if (/盗|倾斜|拆|裂缝|破坏|夹泥墙|灭法|尽毁|毁弃|盗劫/.test(s)) return 'damage'
+  if (/数字|监测|今天|扫描|沉浸|数字重生|AI/.test(s)) return 'digital'
+  if (/国保|世界遗产|吉尼斯|纪录|首批|列入|文保/.test(s)) return 'heritage'
+  if (/匾|题|御|帝王|永乐|正德|朱棣|朱厚照/.test(s)) return 'plaque'
+  return 'construction'
+}
+
 export default function Timeline({ config }: { config: BuildingConfig }) {
   const TIMELINE = config.timeline
   const secRef = useRef<HTMLDivElement>(null)
@@ -155,10 +169,12 @@ export default function Timeline({ config }: { config: BuildingConfig }) {
   const n = TIMELINE.length
 
   useEffect(() => {
-    let raf = 0
+    let last = 0
     const onScroll = () => {
-      cancelAnimationFrame(raf)
-      raf = requestAnimationFrame(() => {
+      const now = performance.now()
+      if (now - last < 50) return
+      last = now
+      {
         const el = secRef.current
         if (!el) return
         const r = el.getBoundingClientRect()
@@ -176,14 +192,11 @@ export default function Timeline({ config }: { config: BuildingConfig }) {
           }
         })
         setActive(best)
-      })
+      }
     }
     onScroll()
     window.addEventListener('scroll', onScroll, { passive: true })
-    return () => {
-      window.removeEventListener('scroll', onScroll)
-      cancelAnimationFrame(raf)
-    }
+    return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
   const f = progress * (n - 1)
@@ -210,6 +223,14 @@ export default function Timeline({ config }: { config: BuildingConfig }) {
       <div ref={secRef} className="relative mx-auto max-w-6xl md:grid md:grid-cols-[1fr_1.1fr]">
         {/* 左侧：粘性剧场 */}
         <div className="sticky top-0 z-10 flex h-[30vh] items-center justify-center gap-6 overflow-hidden px-6 md:h-screen md:flex-col md:gap-8">
+          {/* 年代场景图背景 */}
+          <img
+            key={sceneOf(item.title, item.desc)}
+            src={`/heroes/eras/${sceneOf(item.title, item.desc)}.jpg`}
+            alt=""
+            className="era-scene-img"
+          />
+          <div className="era-scene-mask" />
           {/* 流云 */}
           <svg className="pointer-events-none absolute left-0 top-[18%] hidden w-40 opacity-15 md:block" style={{ transform: `translateX(${progress * 60}px)` }} viewBox="0 0 100 30">
             <path d="M5 22 Q20 8 35 18 Q45 4 60 14 Q75 6 85 18 Q95 16 97 22 Z" fill="#d8cdb4" />

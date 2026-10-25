@@ -167,3 +167,24 @@ html { scroll-behavior: smooth; }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 .year-pop { animation: year-pop 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* 时空长廊：年代场景图 */
+.era-scene-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.22;
+  animation: era-fade 0.8s ease;
+}
+.era-scene-mask {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent, rgba(0,0,0,0.25) 30%, rgba(0,0,0,0.25) 60%, transparent);
+  pointer-events: none;
+}
+@keyframes era-fade {
+  from { opacity: 0; transform: scale(1.04); }
+  to { opacity: 0.22; transform: scale(1); }
+}
