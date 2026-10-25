@@ -50,7 +50,27 @@ const COL = {
   buddha: 0xc2a05a,
 }
 
-const OROT = Math.PI / 8 // 八边形使南面为平面的旋转量
+const OROT = Math.PI / 8
+
+// 卷杀栱臂：两端上卷的弧形木栱（分 7 段拟合）
+function curvedArm(len: number, h: number, thick: number, alongZ: boolean): THREE.BufferGeometry {
+  const segs = 7
+  const geos: THREE.BufferGeometry[] = []
+  for (let i = 0; i < segs; i++) {
+    const t0 = i / segs
+    const t1 = (i + 1) / segs
+    const seg = len / segs
+    const lift = (t: number) => Math.pow(Math.abs(t - 0.5) * 2, 2.4) * h * 0.9
+    const y0 = lift(t0)
+    const y1 = lift(t1)
+    const g = new THREE.BoxGeometry(alongZ ? thick : seg, h, alongZ ? seg : thick)
+    const xm = (t0 + t1) / 2 - 0.5
+    g.translate(alongZ ? 0 : xm * len, h / 2 + (y0 + y1) / 2, alongZ ? xm * len : 0)
+    geos.push(g)
+  }
+  return mergeGeometries(geos)!
+}
+ // 八边形使南面为平面的旋转量
 
 function vtx(R: number, k: number): [number, number] {
   const t = (Math.PI / 4) * k - OROT
@@ -87,7 +107,11 @@ function bracketClusterGeo(s: number): THREE.BufferGeometry {
   add(0.62 * s, 0.42 * s, 0.62 * s, 0, 0.21 * s, 0)
   // 第一跳：华栱（径向 z）+ 泥道栱（切向 x）
   add(0.26 * s, 0.24 * s, 1.7 * s, 0, 0.55 * s, 0)
-  add(1.45 * s, 0.22 * s, 0.26 * s, 0, 0.56 * s, 0)
+  {
+    const arm = curvedArm(1.45 * s, 0.22 * s, 0.26 * s, false)
+    arm.translate(0, 0.56 * s - 0.11 * s, 0)
+    boxes.push(arm)
+  }
   // 交互斗/散斗
   add(0.34 * s, 0.3 * s, 0.34 * s, 0, 0.82 * s, 0.72 * s)
   for (const sg of [-1, 1]) {
@@ -96,7 +120,11 @@ function bracketClusterGeo(s: number): THREE.BufferGeometry {
   }
   // 第二跳 + 令栱 + 撩檐枋
   add(0.26 * s, 0.24 * s, 2.5 * s, 0, 1.02 * s, 0.36 * s)
-  add(2.15 * s, 0.24 * s, 0.28 * s, 0, 1.5 * s, 0.72 * s)
+  {
+    const arm = curvedArm(2.15 * s, 0.24 * s, 0.28 * s, false)
+    arm.translate(0, 1.5 * s - 0.12 * s, 0.72 * s)
+    boxes.push(arm)
+  }
   // 斜昂：杠杆式斜构件
   {
     const ang = new THREE.BoxGeometry(0.3 * s, 0.34 * s, 2.2 * s)
@@ -142,7 +170,7 @@ function roofFaceGeo(Rridge: number, Reave: number, h: number, upturn: number, k
     for (let j = 0; j <= NA; j++) {
       const a = a0 + ((a1 - a0) * j) / NA
       const corner = Math.abs(j / NA - 0.5) * 2 // 0=面中 1=角
-      const y = h / 2 - t * h + upturn * Math.pow(t, 1.6) * Math.pow(corner, 2.2)
+      const y = h / 2 - h * Math.pow(t, 1.35) + upturn * Math.pow(t, 1.6) * Math.pow(corner, 2.2)
       pos.push(rad * Math.sin(a), y, rad * Math.cos(a))
       uvArr.push((j / NA) * ((Reave * 0.85) / 2.4), t * (Math.hypot(Reave - Rridge, h) / 2.4))
     }

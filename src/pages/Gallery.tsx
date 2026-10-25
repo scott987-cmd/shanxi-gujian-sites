@@ -25,16 +25,20 @@ export default function Gallery() {
             <a
               key={s.id}
               href={`#/s/${s.id}`}
-              className="group rounded-2xl border border-[#4a4032] bg-[#262016] p-6 transition hover:-translate-y-1 hover:border-[#c9a227]"
+              className="group overflow-hidden rounded-2xl border border-[#4a4032] bg-[#262016] transition hover:-translate-y-1 hover:border-[#c9a227]"
             >
-              <div className="flex items-center justify-between">
+              <div className="relative h-36 w-full overflow-hidden bg-[#1d1812]">
+                <img src={`/heroes/${s.id}.jpg`} alt={s.name} loading="lazy" className="h-full w-full object-cover opacity-85 transition duration-500 group-hover:scale-105 group-hover:opacity-100" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#262016] to-transparent" />
+              </div>
+              <div className="flex items-center justify-between p-6 pb-0">
                 <span className="seal h-10 w-10 text-base font-bold">{s.seal}</span>
                 <span className="text-xs tracking-widest text-[#6b5f4c]">{String(i + 1).padStart(2, '0')}</span>
               </div>
-              <h2 className="font-serif-sc mt-4 text-2xl font-bold group-hover:text-[#c9a227]">{s.name}</h2>
-              <div className="mt-1 text-xs tracking-wider text-[#8a7f6a]">{s.alias}</div>
-              <div className="mt-1 text-xs tracking-wider text-[#8a7f6a]">{s.location}</div>
-              <div className="mt-4 flex flex-wrap gap-2">
+              <h2 className="font-serif-sc mt-4 px-6 text-2xl font-bold group-hover:text-[#c9a227]">{s.name}</h2>
+              <div className="mt-1 px-6 text-xs tracking-wider text-[#8a7f6a]">{s.alias}</div>
+              <div className="mt-1 px-6 text-xs tracking-wider text-[#8a7f6a]">{s.location}</div>
+              <div className="mt-4 flex flex-wrap gap-2 px-6">
                 {s.heroStats.slice(0, 3).map((st) => (
                   <span key={st.label} className="rounded-full bg-[#1d1812] px-2.5 py-1 text-[10px] text-[#a89c80]">
                     {st.value}
@@ -42,7 +46,7 @@ export default function Gallery() {
                   </span>
                 ))}
               </div>
-              <div className="mt-4 text-xs text-[#c9a227] opacity-0 transition group-hover:opacity-100">进入站点 →</div>
+              <div className="mt-4 p-6 pt-0 text-xs text-[#c9a227] opacity-0 transition group-hover:opacity-100">进入站点 →</div>
             </a>
           ))}
           </div>

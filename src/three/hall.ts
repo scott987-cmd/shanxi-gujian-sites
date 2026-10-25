@@ -36,14 +36,22 @@ function clusterGeo(s: number): THREE.BufferGeometry {
   }
   add(0.62 * s, 0.42 * s, 0.62 * s, 0, 0.21 * s, 0)
   add(0.26 * s, 0.24 * s, 1.7 * s, 0, 0.55 * s, 0)
-  add(1.45 * s, 0.22 * s, 0.26 * s, 0, 0.56 * s, 0)
+  {
+    const arm = curvedArm(1.45 * s, 0.22 * s, 0.26 * s, false)
+    arm.translate(0, 0.56 * s - 0.11 * s, 0)
+    boxes.push(arm)
+  }
   add(0.34 * s, 0.3 * s, 0.34 * s, 0, 0.82 * s, 0.72 * s)
   for (const sg of [-1, 1]) {
     add(0.3 * s, 0.26 * s, 0.3 * s, sg * 0.62 * s, 0.8 * s, 0)
     add(0.3 * s, 0.26 * s, 0.3 * s, sg * 1.05 * s, 1.26 * s, 0.72 * s)
   }
   add(0.26 * s, 0.24 * s, 2.5 * s, 0, 1.02 * s, 0.36 * s)
-  add(2.15 * s, 0.24 * s, 0.28 * s, 0, 1.5 * s, 0.72 * s)
+  {
+    const arm = curvedArm(2.15 * s, 0.24 * s, 0.28 * s, false)
+    arm.translate(0, 1.5 * s - 0.12 * s, 0.72 * s)
+    boxes.push(arm)
+  }
   // 斜昂：杠杆式斜构件
   {
     const ang = new THREE.BoxGeometry(0.3 * s, 0.34 * s, 2.2 * s)
@@ -55,6 +63,27 @@ function clusterGeo(s: number): THREE.BufferGeometry {
   const geo = mergeGeometries(boxes)!
   clusterCache.set(key, geo)
   return geo
+}
+
+
+// 卷杀栱臂：两端上卷的弧形木栱（分 7 段拟合）
+function curvedArm(len: number, h: number, thick: number, alongZ: boolean): THREE.BufferGeometry {
+  const segs = 7
+  const geos: THREE.BufferGeometry[] = []
+  for (let i = 0; i < segs; i++) {
+    const t0 = i / segs
+    const t1 = (i + 1) / segs
+    const seg = len / segs
+    // 中段平直、两端上翘（卷杀）
+    const lift = (t: number) => Math.pow(Math.abs(t - 0.5) * 2, 2.4) * h * 0.9
+    const y0 = lift(t0)
+    const y1 = lift(t1)
+    const g = new THREE.BoxGeometry(alongZ ? thick : seg, h, alongZ ? seg : thick)
+    const xm = (t0 + t1) / 2 - 0.5
+    g.translate(alongZ ? 0 : xm * len, h / 2 + (y0 + y1) / 2, alongZ ? xm * len : 0)
+    geos.push(g)
+  }
+  return mergeGeometries(geos)!
 }
 
 // 屋面网格（带角部起翘）
@@ -80,6 +109,8 @@ function roofFace(
       const top = topA.clone().lerp(topB, u)
       const bot = botA.clone().lerp(botB, u)
       const p = top.lerp(bot, t)
+      // 举折凹曲线：近脊陡、近檐缓
+      p.y = top.y + (bot.y - top.y) * Math.pow(t, 1.35)
       const lift = (upA + (upB - upA) * u) * Math.pow(t, 1.7)
       pos.push(p.x, p.y + lift, p.z)
       uvArr.push(u * (faceW / 2.4), t * (slopeL / 2.4))

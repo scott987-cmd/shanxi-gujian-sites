@@ -63,8 +63,22 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     host.appendChild(renderer.domElement)
 
     const scene = new THREE.Scene()
-    scene.background = new THREE.Color(0x272d36)
-    scene.fog = new THREE.Fog(0x272d36, 170, 400)
+    // 黄昏渐变天空
+    const skyCv = document.createElement('canvas')
+    skyCv.width = 4
+    skyCv.height = 512
+    const skyCtx = skyCv.getContext('2d')!
+    const grad = skyCtx.createLinearGradient(0, 0, 0, 512)
+    grad.addColorStop(0, '#2a3448')
+    grad.addColorStop(0.45, '#4a4a54')
+    grad.addColorStop(0.72, '#8a6a4e')
+    grad.addColorStop(1, '#2b2620')
+    skyCtx.fillStyle = grad
+    skyCtx.fillRect(0, 0, 4, 512)
+    const skyTex = new THREE.CanvasTexture(skyCv)
+    skyTex.colorSpace = THREE.SRGBColorSpace
+    scene.background = skyTex
+    scene.fog = new THREE.Fog(0x3a3440, 170, 400)
 
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 900)
 
