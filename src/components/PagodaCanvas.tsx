@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import { buildPagoda, buildGenericTower, type PagodaModel } from '@/three/pagoda'
 import { buildHall } from '@/three/hall'
 import { buildCliff } from '@/three/cliff'
@@ -19,6 +20,7 @@ export interface PagodaCanvasProps {
   seeThrough: boolean
   autoRotate: boolean
   burstTs: number
+  slowMo: boolean
 }
 
 interface CamPreset {
@@ -33,7 +35,7 @@ interface CamPreset {
 
 const CAM_JOINT = { pos: new THREE.Vector3(4.5, 8, 18.5), tgt: new THREE.Vector3(0, 5, 0) }
 
-export default function PagodaCanvas({ config, mode, explode, spread, selectedId, onSelect, seeThrough, autoRotate, burstTs }: PagodaCanvasProps) {
+export default function PagodaCanvas({ config, mode, explode, spread, selectedId, onSelect, seeThrough, autoRotate, burstTs, slowMo }: PagodaCanvasProps) {
   const hostRef = useRef<HTMLDivElement>(null)
   const stateRef = useRef<{
     renderer: THREE.WebGLRenderer
@@ -50,8 +52,8 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
   } | null>(null)
   const burstRef = useRef<{ active: boolean; t: number }>({ active: false, t: 0 })
 
-  const propsRef = useRef({ mode, explode, spread, selectedId, seeThrough, autoRotate, onSelect })
-  propsRef.current = { mode, explode, spread, selectedId, seeThrough, autoRotate, onSelect }
+  const propsRef = useRef({ mode, explode, spread, selectedId, seeThrough, autoRotate, onSelect, slowMo })
+  propsRef.current = { mode, explode, spread, selectedId, seeThrough, autoRotate, onSelect, slowMo }
 
   // 初始化（仅一次）
   useEffect(() => {
@@ -66,6 +68,10 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     host.appendChild(renderer.domElement)
 
     const scene = new THREE.Scene()
+    // PBR 环境反射（木、瓦、金属的真实反光）
+    const pmrem = new THREE.PMREMGenerator(renderer)
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
+    scene.environmentIntensity = 0.35
     // 黄昏渐变天空
     const skyCv = document.createElement('canvas')
     skyCv.width = 4
@@ -201,8 +207,19 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
       joint.group.visible = p.mode === 'joint'
       env.visible = p.mode === 'pagoda'
 
-      st.explodeCur += (p.explode - st.explodeCur) * 0.09
-      st.radialCur += (p.spread - st.radialCur) * 0.09
+      // 爆炸动画（缓动）/ 瞬间爆炸（回弹）
+      if (burstRef.current.active) {
+        burstRef.current.t = Math.min(1, burstRef.current.t + (slowMo ? 0.012 : 0.05))
+        const t = burstRef.current.t
+        const sBack = 1.70158
+        const ease = 1 + (sBack + 1) * Math.pow(t - 1, 3) + sBack * Math.pow(t - 1, 2)
+        st.explodeCur = ease
+        st.radialCur = ease
+        if (t >= 1) burstRef.current.active = false
+      } else {
+        st.explodeCur += (p.explode - st.explodeCur) * 0.09
+        st.radialCur += (p.spread - st.radialCur) * 0.09
+      }
       const e = st.explodeCur
       const r = st.radialCur
       for (const l of pagoda.layers) {

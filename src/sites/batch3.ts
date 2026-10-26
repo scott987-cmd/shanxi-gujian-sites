@@ -9,6 +9,7 @@ export const bianjinglou: BuildingConfig = {
   location: '山西忻州 · 代县县城',
   geo: [112.96, 39.07, 0, 0],
   archetype: 'hall',
+  eraMoment: '巨匾上楼',
   tagline: '雁门关下的代县城中央，边靖楼以 40 米的高度守望边塞六百年。楼上“声闻四达”巨匾长八米，是中国最大的木质牌匾之一——鼓楼既报时辰，更是军情烽火台。',
   heroStats: [
     { value: '1476', unit: '年', label: '重建 · 明成化十二年' },
@@ -78,6 +79,7 @@ export const tiantaian: BuildingConfig = {
   geo: [113.42, 36.28, -0.09, 0.03],
   archetype: 'hall',
   jointType: 'chashou',
+  eraMoment: '2015',
   tagline: '一座三间小庵，曾被认作中国第四座唐代木构；2015 年大修时，脊槫下的墨迹揭开了真相——“长兴四年”（933 年），五代后唐。一次修缮，改写一页建筑史。',
   heroStats: [
     { value: '933', unit: '年', label: '始建 · 后唐长兴四年' },
@@ -141,6 +143,7 @@ export const dayunyuan: BuildingConfig = {
   geo: [113.44, 36.26, 0.05, -0.06],
   archetype: 'hall',
   jointType: 'chashou',
+  eraMoment: '壁画绘就',
   tagline: '五代后晋天福三年（938 年）的大佛殿，殿内保存着中国唯一的五代寺观壁画；柱头上一道普拍枋，开启了中国木构千年的新做法。',
   heroStats: [
     { value: '938', unit: '年', label: '始建 · 后晋天福三年' },
@@ -203,6 +206,7 @@ export const longmensi: BuildingConfig = {
   geo: [113.48, 36.3, 0.1, 0.05],
   archetype: 'hall',
   jointType: 'chashou',
+  eraMoment: '925',
   tagline: '龙门山腰的龙门寺，把五代、宋、金、元、明、清六个朝代的建筑收进一座寺院——西配殿是五代，大雄宝殿是北宋，天王殿是金，燃灯佛殿是元。走一圈，穿越一千年。',
   heroStats: [
     { value: '六朝', unit: '', label: '五代宋金元明清同寺' },
@@ -267,6 +271,7 @@ export const chongqingsi: BuildingConfig = {
   geo: [112.97, 36.12, -0.06, 0.03],
   archetype: 'hall',
   jointType: 'statue',
+  eraMoment: '十八罗汉',
   tagline: '紫云山下的崇庆寺，千佛殿建于北宋大中祥符九年。真正让这里名扬天下的是三大士殿的十八罗汉宋塑——每一尊的神情都像一个真实的人。',
   heroStats: [
     { value: '1016', unit: '年', label: '始建 · 北宋大中祥符九年' },
@@ -336,6 +341,7 @@ export const faxingsi: BuildingConfig = {
   geo: [112.98, 36.1, 0.07, -0.03],
   archetype: 'hall',
   jointType: 'statue',
+  eraMoment: '燃灯石灯塔',
   tagline: '法兴寺有三宝：唐代舍利石塔、唐代燃灯石灯塔、宋代圆觉殿与殿内十二圆觉菩萨彩塑。上世纪八十年代，为避免煤矿采空区塌陷，全寺整体迁往翠云山——一座会“搬家”的千年古寺。',
   heroStats: [
     { value: '1084', unit: '年', label: '圆觉殿 · 宋元丰七年' },
@@ -410,6 +416,7 @@ export const qingliansi: BuildingConfig = {
   geo: [112.87, 35.61, -0.07, 0.03],
   archetype: 'hall',
   jointType: 'statue',
+  eraMoment: '唐塑六尊',
   tagline: '硖石山腰上下两院：下院古青莲寺存唐代彩塑六尊，垂腿弥勒是现存最早的垂腿坐佛之一；上院释迦殿为北宋遗构。一寺两址，唐宋辉映。',
   heroStats: [
     { value: '唐', unit: '代', label: '古青莲寺唐塑 6 尊' },
@@ -479,6 +486,7 @@ export const yuhuangmiao: BuildingConfig = {
   geo: [112.9, 35.62, 0.07, -0.03],
   archetype: 'hall',
   jointType: 'statue',
+  eraMoment: '二十八宿彩塑',
   tagline: '府城玉皇庙的二十八宿殿里，元代雕塑家刘銮把二十八星宿塑成了二十八个人：角木蛟威严、亢金龙清癯……星座第一次有了面孔。《黑神话：悟空》让这组元代神来之笔火遍全网。',
   heroStats: [
     { value: '1076', unit: '年', label: '始建 · 北宋熙宁九年' },

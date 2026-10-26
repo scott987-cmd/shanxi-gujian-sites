@@ -10,6 +10,7 @@ export const nanchansi: BuildingConfig = {
   geo: [113.15, 38.82, -0.12, -0.05],
   archetype: 'hall',
   jointType: 'chashou',
+  eraMoment: '782',
   tagline:
     '唐建中三年（782 年），一座三间小殿在五台山外的村落里落成。它躲过了会昌灭法，熬过了一千两百年的风雨地震，是今天中国大地上现存最古老的木构建筑。',
   heroStats: [
@@ -96,6 +97,7 @@ export const jinci: BuildingConfig = {
   geo: [112.44, 37.7, 0, 0],
   archetype: 'hall',
   jointType: 'panlong',
+  eraMoment: '1087',
   tagline:
     '北宋天圣年间，为祭祀唐叔虞之母邑姜，太原晋水畔建起这座重檐大殿。殿前八条木雕蟠龙盘柱欲飞，殿内四十三尊宋代侍女塑像衣袂如生，门前的鱼沼飞梁是世界上最早的十字形桥梁。',
   heroStats: [
@@ -181,6 +183,7 @@ export const xuankongsi: BuildingConfig = {
   geo: [113.71, 39.66, 0.06, 0],
   archetype: 'cliff',
   jointType: 'cliff-beam',
+  eraMoment: '2010',
   tagline:
     '北魏后期，工匠把二十七根横梁插进恒山翠屏峰的崖壁，在半空建起四十间殿阁。远望如浮雕嵌于绝壁，登临则栈道悬空——它不靠立木支撑，靠的是杠杆与勇气。',
   heroStats: [
@@ -245,6 +248,7 @@ export const huayansi: BuildingConfig = {
   location: '山西大同 · 华严寺',
   geo: [113.3, 40.09, -0.07, 0.03],
   archetype: 'hall',
+  eraMoment: '天宫楼阁',
   tagline:
     '辽重熙七年（1038 年），华严寺建起这座藏经殿。殿内环壁而立的“天宫楼阁”壁藏，把辽代建筑的精工缩微成 38 间空中楼阁；一尊合掌露齿的胁侍菩萨，被郑振铎赞为“东方维纳斯”。',
   heroStats: [
@@ -326,6 +330,7 @@ export const shanhuasi: BuildingConfig = {
   geo: [113.3, 40.08, 0.07, -0.04],
   archetype: 'hall',
   jointType: 'statue',
+  eraMoment: '圆满大师',
   tagline:
     '大同城南的善化寺，是中国现存最完整的辽金寺院。大雄宝殿面阔七间 41.8 米，减柱造让殿内空间豁然开朗；五方佛与二十四诸天彩塑肃立千年，是辽金气象最完整的现场。',
   heroStats: [

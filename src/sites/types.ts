@@ -99,4 +99,5 @@ export interface BuildingConfig {
   legacy: LegacyInfo
   signature: SignatureInfo
   jointType?: 'default' | 'chashou' | 'cliff-beam' | 'glaze' | 'panlong' | 'statue'
+  eraMoment?: string // 该站标志性历史事件关键词（用于长廊专属剧照）
 }

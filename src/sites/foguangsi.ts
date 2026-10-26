@@ -9,6 +9,7 @@ export const foguangsi: BuildingConfig = {
   geo: [113.42, 38.95, 0.1, 0.06],
   archetype: 'hall',
   jointType: 'chashou',
+  eraMoment: '1937',
   tagline:
     '公元 857 年，唐大中十一年，长安女弟子宁公遇施资、高僧愿诚主持重建。1937 年，梁思成、林徽因循着敦煌壁画《五台山图》的线索找到它，一举打破“中国已无唐代木构”的断言。',
   heroStats: [

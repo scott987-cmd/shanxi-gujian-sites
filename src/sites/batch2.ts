@@ -9,6 +9,7 @@ export const yonglegong: BuildingConfig = {
   location: '山西运城 · 芮城县',
   geo: [110.69, 34.69, 0, 0],
   archetype: 'hall',
+  eraMoment: '1959',
   tagline:
     '元代全真教三大祖庭之一。三清殿四壁的《朝元图》以近三百位天神朝谒元始天尊，是中国壁画的巅峰。1959 年，为避让三门峡水库，整座宫殿群被逐块编号拆运、异地重建——世界文物保护史上罕见的整体搬迁。',
   heroStats: [
@@ -111,6 +112,7 @@ export const feihongta: BuildingConfig = {
   archetype: 'tower',
   jointType: 'glaze',
   tower: { stories: 13, glaze: true },
+  eraMoment: '1515',
   tagline:
     '明代正德至嘉靖年间，十三层琉璃宝塔在霍山之巅重建完成。木塔会朽，砖塔会老，而飞虹塔把整座建筑烧成了陶瓷——五百年过去，琉璃上的菩萨与莲花仍然鲜艳如初。',
   heroStats: [
@@ -167,6 +169,7 @@ export const shuanglinsi: BuildingConfig = {
   geo: [112.19, 37.2, -0.08, 0.04],
   archetype: 'hall',
   jointType: 'statue',
+  eraMoment: '明代',
   tagline:
     '平遥城外的双林寺，十座殿宇里住着两千余尊彩塑。千手观音慈悲低垂，韦驮将军扭身怒目——被行家称为“天下第一韦驮”。这里的木头是骨架，泥巴才是灵魂。',
   heroStats: [
@@ -257,6 +260,7 @@ export const zhenguosi: BuildingConfig = {
   geo: [112.24, 37.24, 0.08, -0.04],
   archetype: 'hall',
   jointType: 'chashou',
+  eraMoment: '963',
   tagline:
     '公元 963 年，五代十国的乱世里，北汉小国在平遥城外建起这座佛殿。它没有唐代前辈的名气，却是中国现存最古老的木构之一——殿内十一尊五代彩塑，是敦煌之外仅存的五代寺观彩塑。',
   heroStats: [
@@ -338,6 +342,7 @@ export const chongfusi: BuildingConfig = {
   geo: [112.43, 39.31, 0, 0],
   archetype: 'hall',
   jointType: 'panlong',
+  eraMoment: '1143',
   tagline:
     '金皇统三年（1143 年）建成的弥陀殿，面阔七间 41 米，与八百年前相比几乎未变。琉璃脊饰、菱花门窗、金代壁画、塑像与匾额同殿共存，被称为“崇福五绝”——一座殿就是一部金代艺术全集。',
   heroStats: [

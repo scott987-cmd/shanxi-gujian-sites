@@ -327,6 +327,16 @@ export function buildHall(cfg: HallParams): PagodaModel {
         const door = new THREE.Mesh(new THREE.PlaneGeometry(4.4, ch * 0.6), mDoor)
         door.position.set(0, ch * 0.3 + 0.4, Dl / 2 + 0.01)
         g.add(door)
+        // 前檐格扇窗带（次间与梢间）
+        for (let bi = 0; bi < cfg.bays; bi++) {
+          if (bi === Math.floor(cfg.bays / 2)) continue // 明间留门
+          const bx = -Wl / 2 + (bi + 0.5) * (Wl / cfg.bays)
+          const winMat = new THREE.MeshStandardMaterial({ map: latticeTex(1.2, 1.3), roughness: 0.85, transparent: true })
+          fadeMats.push(winMat)
+          const win = new THREE.Mesh(new THREE.PlaneGeometry((Wl / cfg.bays) * 0.72, ch * 0.55), winMat)
+          win.position.set(bx, 0.4 + ch * 0.4, Dl / 2 + 0.02)
+          g.add(win)
+        }
         // 造像与佛光
         const mBuddha = mat(COL.buddha, 0.55)
         for (const s of cfg.statues) {

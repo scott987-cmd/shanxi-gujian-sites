@@ -224,12 +224,12 @@ export default function Timeline({ config }: { config: BuildingConfig }) {
         {/* 左侧：粘性剧场 */}
         <div className="sticky top-0 z-10 flex h-[30vh] items-center justify-center gap-6 overflow-hidden px-6 md:h-screen md:flex-col md:gap-8">
           {/* 年代场景图背景 */}
-          <img
-            key={sceneOf(item.title, item.desc)}
-            src={`/heroes/eras/${sceneOf(item.title, item.desc)}.jpg`}
-            alt=""
-            className="era-scene-img"
-          />
+          {(() => {
+            const generic = sceneOf(item.title, item.desc)
+            const isSignature = config.eraMoment && (item.year + item.title + item.desc).includes(config.eraMoment)
+            const scene = isSignature ? `${config.id}-sig` : generic
+            return <img key={scene} src={`/heroes/eras/${scene}.jpg`} alt="" className="era-scene-img" />
+          })()}
           <div className="era-scene-mask" />
           {/* 流云 */}
           <svg className="pointer-events-none absolute left-0 top-[18%] hidden w-40 opacity-15 md:block" style={{ transform: `translateX(${progress * 60}px)` }} viewBox="0 0 100 30">
