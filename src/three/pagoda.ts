@@ -259,6 +259,25 @@ export function buddhaGeo(): THREE.BufferGeometry {
   ush.translate(0, 2.16, 0)
   const halo = new THREE.TorusGeometry(0.55, 0.05, 6, 24)
   halo.translate(0, 1.7, -0.3)
+  // 合十双臂（前身环臂）
+  const arms = new THREE.TorusGeometry(0.3, 0.09, 6, 12, Math.PI)
+  arms.rotateX(Math.PI / 2)
+  arms.rotateZ(Math.PI)
+  arms.translate(0, 1.05, 0.34)
+  parts.push(arms)
+  // 内背光盘（微发光感）
+  const haloDisc = new THREE.CircleGeometry(0.5, 16)
+  haloDisc.translate(0, 1.7, -0.34)
+  parts.push(haloDisc)
+  // 莲瓣一周
+  for (let k = 0; k < 8; k++) {
+    const a = (Math.PI / 4) * k
+    const petal = new THREE.ConeGeometry(0.16, 0.3, 4)
+    petal.rotateX(Math.PI / 2)
+    petal.rotateY(-a)
+    petal.translate(Math.sin(a) * 0.82, 0.24, Math.cos(a) * 0.82)
+    parts.push(petal)
+  }
   parts.push(p1, p2, body, head, ush, halo)
   buddhaGeoCache = mergeGeometries(parts)!
   return buddhaGeoCache
@@ -515,11 +534,16 @@ export function buildPagoda(): PagodaModel {
       }
       const colR = isVeranda ? 0.24 : 0.28
       const colGeo = new THREE.CylinderGeometry(colR, colR * 1.08, h, 8)
+      const baseGeo = new THREE.CylinderGeometry(0.46, 0.52, 0.32, 8)
+      const baseGeos: THREE.BufferGeometry[] = []
       columnPositions(R).forEach(([x, z], ci) => {
         const c = new THREE.Mesh(colGeo, mWood)
         c.position.set(x, h / 2, z)
         g.add(c)
         addRadial(c, 0.3)
+        const bs = baseGeo.clone()
+        bs.translate(x, 0.16, z)
+        baseGeos.push(bs)
         const tag = textSprite(`${storyTag[part.id]}${String(ci + 1).padStart(2, '0')}`, 1.35, 0.42, 56)
         tag.position.set(0, h / 2 + 0.5, 0)
         const tm = tag.material as THREE.SpriteMaterial
@@ -527,6 +551,7 @@ export function buildPagoda(): PagodaModel {
         labelMats.push(tm)
         c.add(tag)
       })
+      g.add(new THREE.Mesh(mergeGeometries(baseGeos)!, mat(COL.stone, 0.9)))
       if (!isVeranda) {
         // 内槽柱
         const mInner = mat(COL.woodDark)

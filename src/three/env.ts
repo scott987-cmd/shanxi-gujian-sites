@@ -168,7 +168,7 @@ function buildCourtyard(): THREE.Group {
   crowns.castShadow = true
   g.add(trunks, crowns)
 
-  // 远山剪影
+  // 远山（起伏地形网格）
   const hillMat = m(0x2b3138, 1)
   const hills: [number, number, number, number][] = [
     [-180, -240, 150, 55],
@@ -178,8 +178,18 @@ function buildCourtyard(): THREE.Group {
     [250, 90, 140, 40],
   ]
   const hillGeos = hills.map(([x, z, r, h]) => {
-    const hg = new THREE.ConeGeometry(r, h, 24)
-    hg.translate(x, h / 2 - 1, z)
+    const hg = new THREE.PlaneGeometry(r * 2.2, r * 1.6, 22, 16)
+    hg.rotateX(-Math.PI / 2)
+    const pos = hg.attributes.position as THREE.BufferAttribute
+    for (let i = 0; i < pos.count; i++) {
+      const px = pos.getX(i) / (r * 1.1)
+      const pz = pos.getY(i) / (r * 0.8)
+      const fall = Math.max(0, 1 - (px * px + pz * pz))
+      const ridge = Math.sin(px * 3.1 + z) * 0.3 + Math.cos(pz * 2.7 + x) * 0.3 + 0.55
+      pos.setZ(i, fall * h * ridge)
+    }
+    hg.computeVertexNormals()
+    hg.translate(x, -1, z)
     return hg
   })
   g.add(new THREE.Mesh(mergeGeometries(hillGeos)!, hillMat))

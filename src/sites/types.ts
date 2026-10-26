@@ -56,6 +56,7 @@ export interface HallParams {
   floors?: number // 楼阁层数（默认 1）
   statues: { x: number; z: number; s: number; ry?: number }[]
   plaqueTexts: string[] // 明间正中大匾
+  water?: boolean // 殿前水池与十字飞梁（晋祠）
 }
 
 export interface LegacyInfo {

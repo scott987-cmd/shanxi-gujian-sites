@@ -243,6 +243,29 @@ export function buildHall(cfg: HallParams): PagodaModel {
     const steps = new THREE.Mesh(new THREE.BoxGeometry(4, platH * 0.5, 2.4), m2)
     steps.position.set(0, platH * 0.25, D / 2 + 3.4)
     g.add(steps)
+    // 晋祠：殿前鱼沼与十字飞梁
+    if (cfg.water) {
+      const pond = new THREE.Mesh(
+        new THREE.PlaneGeometry(17, 11),
+        new THREE.MeshStandardMaterial({ color: 0x3d5a66, roughness: 0.25, metalness: 0.3 }),
+      )
+      pond.rotation.x = -Math.PI / 2
+      pond.position.set(0, 0.08, D / 2 + 8.5)
+      g.add(pond)
+      const mBridge = mat(0x9a8f7d, 0.85)
+      const deck1 = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.35, 15), mBridge)
+      deck1.position.set(0, 0.85, D / 2 + 7.0)
+      const deck2 = new THREE.Mesh(new THREE.BoxGeometry(15, 0.35, 3.0), mBridge)
+      deck2.position.set(0, 0.85, D / 2 + 8.0)
+      g.add(deck1, deck2)
+      const pierGeos: THREE.BufferGeometry[] = []
+      for (const [px, pz] of [[-4, 6.5], [4, 6.5], [-4, 10], [4, 10], [0, 8.5]] as const) {
+        const pier = new THREE.CylinderGeometry(0.3, 0.34, 1.4, 8)
+        pier.translate(px, 0.3, D / 2 + pz)
+        pierGeos.push(pier)
+      }
+      g.add(new THREE.Mesh(mergeGeometries(pierGeos)!, mBridge))
+    }
     pushH('platform', platH, g, [m1, m2])
   }
 
@@ -265,7 +288,9 @@ export function buildHall(cfg: HallParams): PagodaModel {
       mWall.map = plasterTex()
       const mBeam = mat(COL.woodDark)
       mBeam.map = woodTex()
-      const colGeo = new THREE.CylinderGeometry(0.3, 0.33, ch, 8)
+      const colGeo = new THREE.CylinderGeometry(0.27, 0.33, ch, 8) // 柱头卷杀
+      const baseGeo = new THREE.CylinderGeometry(0.48, 0.55, 0.36, 8)
+      const mBase = mat(COL.stone, 0.9)
       const perim: [number, number][] = []
       for (let i = 0; i <= cfg.bays; i++) {
         const x = -Wl / 2 + i * (Wl / cfg.bays)
@@ -275,12 +300,17 @@ export function buildHall(cfg: HallParams): PagodaModel {
         const z = -Dl / 2 + j * (Dl / cfg.depthBays)
         perim.push([-Wl / 2, z], [Wl / 2, z])
       }
+      const baseGeos: THREE.BufferGeometry[] = []
       perim.forEach(([x, z]) => {
         const c = new THREE.Mesh(colGeo, mWood)
         c.position.set(x, ch / 2, z)
         g.add(c)
         addRadial(c, 0.3)
+        const bs = baseGeo.clone()
+        bs.translate(x, 0.18, z)
+        baseGeos.push(bs)
       })
+      g.add(new THREE.Mesh(mergeGeometries(baseGeos)!, mBase))
       if (isGround) {
         // 内槽金柱
         const innerGeo = new THREE.CylinderGeometry(0.36, 0.39, ch + beamH * 0.5, 8)
@@ -495,6 +525,23 @@ export function buildHall(cfg: HallParams): PagodaModel {
       g.add(mesh)
       radialParts.push({ mesh, dx: f.nx, dz: f.nz, amount: 2.6, baseX: 0, baseY: 0, baseZ: 0, lift: 0.8 })
     }
+    // 檐口连檐与瓦当
+    const fascia = new THREE.Mesh(new THREE.BoxGeometry(eaveW * 2, 0.22, 0.18), mat(COL.woodDark))
+    fascia.position.set(0, 0.05, eaveD)
+    g.add(fascia)
+    const fasciaB = fascia.clone()
+    fasciaB.position.z = -eaveD
+    g.add(fasciaB)
+    const wadangGeos: THREE.BufferGeometry[] = []
+    for (let x = -eaveW + 0.4; x <= eaveW - 0.4; x += 0.45) {
+      for (const z of [eaveD, -eaveD]) {
+        const d = new THREE.CylinderGeometry(0.1, 0.1, 0.06, 8)
+        d.rotateX(Math.PI / 2)
+        d.translate(x, 0.05, z)
+        wadangGeos.push(d)
+      }
+    }
+    g.add(new THREE.Mesh(mergeGeometries(wadangGeos)!, mat(COL.roofRidge, 0.85)))
     // 前后檐椽条
     const mRafter = mat(COL.woodDark, 0.9, { transparent: true })
     fadeMats.push(mRafter)
@@ -509,6 +556,29 @@ export function buildHall(cfg: HallParams): PagodaModel {
       rafterGeos.push(side1, side2)
     }
     g.add(new THREE.Mesh(mergeGeometries(rafterGeos)!, mRafter))
+    // 歇山：山花板与悬鱼
+    if (cfg.roof === 'xieshan') {
+      const mGable = mat(0xd9cbb0, 0.9, { side: THREE.DoubleSide })
+      mGable.map = plasterTex()
+      const gx = ridgeLen / 2 + 0.2
+      for (const sx of [-1, 1]) {
+        const gable = new THREE.BufferGeometry()
+        const gy = roofH * 0.98
+        const by = roofH * 0.42
+        const bz = eaveD * 0.5
+        const pos = new Float32Array([sx * gx, gy, 0, sx * gx, by, bz, sx * gx, by, -bz])
+        gable.setAttribute('position', new THREE.BufferAttribute(pos, 3))
+        gable.setAttribute('uv', new THREE.BufferAttribute(new Float32Array([0.5, 1, 0, 0, 1, 0]), 2))
+        gable.setIndex([0, 1, 2])
+        gable.computeVertexNormals()
+        g.add(new THREE.Mesh(gable, mGable))
+        // 悬鱼（木鱼形垂饰）
+        const fish = new THREE.Mesh(new THREE.ConeGeometry(0.22, 1.1, 4), mat(COL.woodDark))
+        fish.rotation.x = Math.PI
+        fish.position.set(sx * (gx + 0.12), by + 0.55, 0)
+        g.add(fish)
+      }
+    }
     // 重檐下檐环（单层殿用）
     if (cfg.doubleEave && floors === 1) {
       const mRoof2 = mRoof
