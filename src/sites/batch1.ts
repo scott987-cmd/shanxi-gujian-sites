@@ -128,6 +128,7 @@ export const jinci: BuildingConfig = {
     ],
     plaqueTexts: ['圣母殿'],
     water: true,
+    dragonColumns: true,
   },
   parts: [
     { id: 'platform', label: '台基', short: '台基', kind: 'platform', desc: '大殿建于石砌台基之上，前临鱼沼飞梁水池。台基与月台、石桥共同组成宋代祠庙的完整礼仪空间。', facts: ['石砌台基', '前临鱼沼', '月台宽阔'] },

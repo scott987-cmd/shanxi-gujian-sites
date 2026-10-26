@@ -57,6 +57,8 @@ export interface HallParams {
   statues: { x: number; z: number; s: number; ry?: number }[]
   plaqueTexts: string[] // 明间正中大匾
   water?: boolean // 殿前水池与十字飞梁（晋祠）
+  dragonColumns?: boolean // 前檐蟠龙柱（晋祠）
+  richLattice?: boolean // 多纹样菱花窗（崇福寺等）
 }
 
 export interface LegacyInfo {

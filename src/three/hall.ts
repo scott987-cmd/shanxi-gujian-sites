@@ -4,7 +4,7 @@ import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js
 import type { PagodaModel, BuiltLayer, RadialPart } from './pagoda'
 import type { HallParams } from '@/sites/types'
 import { plaqueMesh, buddhaGeo } from './pagoda'
-import { tileTex, woodTex, plasterTex, latticeTex } from './textures'
+import { tileTex, woodTex, plasterTex, latticeTex, latticeVariantTex } from './textures'
 
 const COL = {
   wood: 0x8a5a35,
@@ -357,11 +357,34 @@ export function buildHall(cfg: HallParams): PagodaModel {
         const door = new THREE.Mesh(new THREE.PlaneGeometry(4.4, ch * 0.6), mDoor)
         door.position.set(0, ch * 0.3 + 0.4, Dl / 2 + 0.01)
         g.add(door)
-        // 前檐格扇窗带（次间与梢间）
+        // 晋祠：前檐蟠龙柱（宋元祐木雕盘龙）
+      if (cfg.dragonColumns) {
+        const dragonMat = mat(0xc9a227, 0.55, { metalness: 0.2 })
+        for (const dx of [-Wl / 2 + (Wl / cfg.bays) * 1.0, Wl / 2 - (Wl / cfg.bays) * 1.0]) {
+          const geos: THREE.BufferGeometry[] = []
+          for (let k = 0; k < 13; k++) {
+            const a = k * 0.72
+            const seg = new THREE.CapsuleGeometry(0.15, 0.28, 3, 6)
+            seg.rotateZ(Math.PI / 2)
+            seg.rotateY(a)
+            seg.translate(Math.cos(a) * 0.5, 0.9 + k * 0.32, Math.sin(a) * 0.5)
+            geos.push(seg)
+          }
+          const head = new THREE.ConeGeometry(0.22, 0.55, 6)
+          head.rotateZ(-0.9)
+          head.translate(0.55, 5.1, 0)
+          geos.push(head)
+          const dragon = new THREE.Mesh(mergeGeometries(geos)!, dragonMat)
+          dragon.position.set(dx, 0, Dl / 2)
+          g.add(dragon)
+          addRadial(dragon, 0.3)
+        }
+      }
+      // 前檐格扇窗带（次间与梢间）
         for (let bi = 0; bi < cfg.bays; bi++) {
           if (bi === Math.floor(cfg.bays / 2)) continue // 明间留门
           const bx = -Wl / 2 + (bi + 0.5) * (Wl / cfg.bays)
-          const winMat = new THREE.MeshStandardMaterial({ map: latticeTex(1.2, 1.3), roughness: 0.85, transparent: true })
+          const winMat = new THREE.MeshStandardMaterial({ map: cfg.richLattice ? latticeVariantTex(bi % 5, 1.2, 1.3) : latticeTex(1.2, 1.3), roughness: 0.85, transparent: true })
           fadeMats.push(winMat)
           const win = new THREE.Mesh(new THREE.PlaneGeometry((Wl / cfg.bays) * 0.72, ch * 0.55), winMat)
           win.position.set(bx, 0.4 + ch * 0.4, Dl / 2 + 0.02)
@@ -625,6 +648,12 @@ export function buildHall(cfg: HallParams): PagodaModel {
         }
       }
     }
+    // 正脊合脊瓦带
+    const capMat = mat(0xececec, 0.85)
+    capMat.map = tileTex()
+    const cap = new THREE.Mesh(new THREE.BoxGeometry(ridgeLen + 0.3, 0.3, 0.55), capMat)
+    cap.position.y = 0.52
+    g.add(cap)
     g.add(new THREE.Mesh(mergeGeometries(ridges)!, mRidge))
     for (const sx of [-1, 1]) {
       const orn = new THREE.Mesh(new THREE.ConeGeometry(0.55, 1.6, 6), mOrn)

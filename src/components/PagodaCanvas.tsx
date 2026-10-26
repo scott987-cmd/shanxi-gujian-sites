@@ -110,6 +110,7 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     sun.shadow.camera.bottom = -10
     sun.shadow.camera.far = 260
     sun.shadow.bias = -0.0004
+    sun.shadow.normalBias = 0.025
     scene.add(sun)
     const rim = new THREE.DirectionalLight(0x9db4d0, 0.5)
     rim.position.set(-45, 30, -50)

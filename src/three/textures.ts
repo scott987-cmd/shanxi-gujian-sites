@@ -162,3 +162,112 @@ export function latticeTex(repX: number, repY: number): THREE.CanvasTexture {
   t.repeat.set(repX, repY)
   return t
 }
+
+// 菱花纹样变体（0 十字格 1 菱形 2 步步锦 3 冰裂纹 4 龟背）
+export function latticeVariantTex(variant: number, repX = 1, repY = 1): THREE.CanvasTexture {
+  const cv = document.createElement('canvas')
+  cv.width = cv.height = 256
+  const ctx = cv.getContext('2d')!
+  ctx.fillStyle = '#241c14'
+  ctx.fillRect(0, 0, 256, 256)
+  ctx.strokeStyle = '#8a5a35'
+  ctx.lineWidth = 3
+  const cell = 32
+  if (variant === 0) {
+    for (let i = 0; i <= 256; i += cell) {
+      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 256); ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(256, i); ctx.stroke()
+    }
+  } else if (variant === 1) {
+    for (let y = 0; y < 256; y += cell) {
+      for (let x = 0; x < 256; x += cell) {
+        ctx.beginPath()
+        ctx.moveTo(x + cell / 2, y)
+        ctx.lineTo(x + cell, y + cell / 2)
+        ctx.lineTo(x + cell / 2, y + cell)
+        ctx.lineTo(x, y + cell / 2)
+        ctx.closePath()
+        ctx.stroke()
+      }
+    }
+  } else if (variant === 2) {
+    for (let i = 0; i <= 256; i += cell) {
+      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 256); ctx.stroke()
+    }
+    for (let y = 0; y < 256; y += cell * 2) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(256, y); ctx.stroke()
+      ctx.beginPath(); ctx.moveTo(0, y + 8); ctx.lineTo(256, y + 8); ctx.stroke()
+    }
+  } else if (variant === 3) {
+    for (let i = 0; i < 40; i++) {
+      const x = Math.random() * 256
+      const y = Math.random() * 256
+      ctx.beginPath()
+      ctx.moveTo(x, y)
+      ctx.lineTo(x + (Math.random() - 0.5) * 70, y + (Math.random() - 0.5) * 70)
+      ctx.stroke()
+    }
+  } else {
+    for (let y = 0; y < 256; y += cell) {
+      for (let x = 0; x < 256; x += cell) {
+        ctx.beginPath()
+        ctx.moveTo(x + 8, y)
+        ctx.lineTo(x + cell - 8, y)
+        ctx.lineTo(x + cell, y + cell / 2)
+        ctx.lineTo(x + cell - 8, y + cell)
+        ctx.lineTo(x + 8, y + cell)
+        ctx.lineTo(x, y + cell / 2)
+        ctx.closePath()
+        ctx.stroke()
+      }
+    }
+  }
+  const tex = new THREE.CanvasTexture(cv)
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping
+  tex.repeat.set(repX, repY)
+  tex.colorSpace = THREE.SRGBColorSpace
+  return tex
+}
+
+// 接地阴影（径向渐变）
+let _contact: THREE.CanvasTexture | null = null
+export function contactTex(): THREE.CanvasTexture {
+  if (_contact) return _contact
+  const cv = document.createElement('canvas')
+  cv.width = cv.height = 256
+  const ctx = cv.getContext('2d')!
+  const grad = ctx.createRadialGradient(128, 128, 20, 128, 128, 126)
+  grad.addColorStop(0, 'rgba(0,0,0,0.5)')
+  grad.addColorStop(0.7, 'rgba(0,0,0,0.22)')
+  grad.addColorStop(1, 'rgba(0,0,0,0)')
+  ctx.fillStyle = grad
+  ctx.fillRect(0, 0, 256, 256)
+  _contact = new THREE.CanvasTexture(cv)
+  return _contact
+}
+
+// 广场石板
+let _slab: THREE.CanvasTexture | null = null
+export function slabTex(): THREE.CanvasTexture {
+  if (_slab) return _slab
+  const cv = document.createElement('canvas')
+  cv.width = cv.height = 256
+  const ctx = cv.getContext('2d')!
+  ctx.fillStyle = '#5a5344'
+  ctx.fillRect(0, 0, 256, 256)
+  for (let y = 0; y < 256; y += 42) {
+    for (let x = 0; x < 256; x += 64) {
+      const offset = (Math.floor(y / 42) % 2) * 32
+      ctx.fillStyle = `rgba(0,0,0,${0.15 + Math.random() * 0.1})`
+      ctx.fillRect(x + offset, y, 2, 42)
+      ctx.fillRect(x + offset, y, 64, 2)
+      ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.04})`
+      ctx.fillRect(x + offset + 2, y + 2, 60, 38)
+    }
+  }
+  _slab = new THREE.CanvasTexture(cv)
+  _slab.wrapS = _slab.wrapT = THREE.RepeatWrapping
+  _slab.repeat.set(8, 8)
+  _slab.colorSpace = THREE.SRGBColorSpace
+  return _slab
+}

@@ -1,6 +1,7 @@
 // 环境：佛宫寺院落、山门、松柏、远山（黄昏）
 import * as THREE from 'three'
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js'
+import { slabTex, contactTex } from './textures'
 
 function m(color: number, roughness = 0.95) {
   return new THREE.MeshStandardMaterial({ color, roughness })
@@ -84,7 +85,7 @@ function buildCourtyard(): THREE.Group {
   g.add(terrain)
 
   // 寺院石板广场
-  const plaza = new THREE.Mesh(new THREE.CircleGeometry(30, 40), m(0x5a5344))
+  const plaza = new THREE.Mesh(new THREE.CircleGeometry(30, 40), (() => { const mm = m(0x5a5344); mm.map = slabTex(); return mm })())
   plaza.rotation.x = -Math.PI / 2
   plaza.receiveShadow = true
   g.add(plaza)
@@ -193,6 +194,15 @@ function buildCourtyard(): THREE.Group {
     return hg
   })
   g.add(new THREE.Mesh(mergeGeometries(hillGeos)!, hillMat))
+
+  // 建筑接地阴影
+  const contact = new THREE.Mesh(
+    new THREE.PlaneGeometry(58, 58),
+    new THREE.MeshBasicMaterial({ map: contactTex(), transparent: true, depthWrite: false }),
+  )
+  contact.rotation.x = -Math.PI / 2
+  contact.position.y = 0.03
+  g.add(contact)
 
   // 散置碑石点缀
   for (const [x, z] of [

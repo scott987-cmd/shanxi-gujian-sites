@@ -290,6 +290,16 @@ function placeBuddha(parent: THREE.Group, m: THREE.Material, x: number, z: numbe
   b.rotation.y = ry
   b.castShadow = true
   parent.add(b)
+  // 衣纹（腹部两圈皱褶）
+  const robeMat = new THREE.MeshStandardMaterial({ color: 0x8a6a3e, roughness: 0.7 })
+  for (const fy of [0.72, 0.86]) {
+    const fold = new THREE.Mesh(new THREE.TorusGeometry(0.46, 0.022, 5, 18), robeMat)
+    fold.rotation.x = Math.PI / 2
+    fold.position.set(x, fy * s, z)
+    fold.scale.setScalar(s)
+    fold.rotation.y = ry
+    parent.add(fold)
+  }
 }
 
 function addStatues(id: string, g: THREE.Group, m: THREE.Material, h: number) {

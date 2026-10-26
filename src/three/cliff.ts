@@ -50,7 +50,17 @@ export function buildCliff(): PagodaModel {
     mR.bumpScale = 0.6
     const geos: THREE.BufferGeometry[] = []
     // 主崖面（后壁）
-    const main = new THREE.BoxGeometry(40, 34, 5)
+    const main = new THREE.BoxGeometry(40, 34, 5, 20, 16, 4)
+    // 崖面几何起伏（岩壁天然凹凸）
+    const mp = main.attributes.position as THREE.BufferAttribute
+    for (let i = 0; i < mp.count; i++) {
+      const x = mp.getX(i)
+      const y = mp.getY(i)
+      const z = mp.getZ(i)
+      const n = Math.sin(x * 1.3 + y * 0.7) * 0.35 + Math.cos(y * 1.1 + x * 0.5) * 0.3
+      mp.setZ(i, z + n)
+    }
+    main.computeVertexNormals()
     main.translate(0, 17, -6.5)
     geos.push(main)
     // 顶部前突的压檐岩（为寺院遮雨）
