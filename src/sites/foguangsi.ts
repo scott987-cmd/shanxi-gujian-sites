@@ -8,6 +8,7 @@ export const foguangsi: BuildingConfig = {
   location: '山西忻州 · 五台县佛光山',
   geo: [113.42, 38.95, 0.1, 0.06],
   archetype: 'hall',
+  envKind: 'mountain',
   jointType: 'chashou',
   eraMoment: '1937',
   tagline:

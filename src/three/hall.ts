@@ -391,7 +391,7 @@ export function buildHall(cfg: HallParams): PagodaModel {
           g.add(win)
         }
         // 造像与佛光
-        const mBuddha = mat(COL.buddha, 0.55)
+        const mBuddha = mat(cfg.statueColor ?? COL.buddha, 0.55)
         for (const s of cfg.statues) {
           const b = new THREE.Mesh(buddhaGeo(), mBuddha)
           b.position.set(s.x, 0, s.z)

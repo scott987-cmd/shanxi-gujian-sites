@@ -9,6 +9,7 @@ export const nanchansi: BuildingConfig = {
   location: '山西忻州 · 五台县李家庄',
   geo: [113.15, 38.82, -0.12, -0.05],
   archetype: 'hall',
+  envKind: 'mountain',
   jointType: 'chashou',
   eraMoment: '782',
   tagline:
@@ -117,6 +118,7 @@ export const jinci: BuildingConfig = {
     doubleEave: true,
     innerColRows: 1,
     bracketSize: 1.2,
+    statueColor: 12159594,
     statues: [
       { x: 0, z: -3.5, s: 1.5 },
       { x: -3, z: -2.5, s: 0.85 },

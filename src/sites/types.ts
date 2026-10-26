@@ -55,6 +55,7 @@ export interface HallParams {
   bracketSize: number // 斗拱尺度系数
   floors?: number // 楼阁层数（默认 1）
   statues: { x: number; z: number; s: number; ry?: number }[]
+  statueColor?: number // 造像主色（金/彩绘）
   plaqueTexts: string[] // 明间正中大匾
   water?: boolean // 殿前水池与十字飞梁（晋祠）
   dragonColumns?: boolean // 前檐蟠龙柱（晋祠）
@@ -85,6 +86,7 @@ export interface BuildingConfig {
   location: string
   geo?: [number, number, number, number] // 经度, 纬度, 偏移x, 偏移y（度）
   archetype: 'pagoda' | 'hall' | 'tower' | 'cliff'
+  envKind?: 'courtyard' | 'mountain'
   tower?: { stories: number; glaze: boolean }
   tagline: string
   heroStats: StatItem[]
