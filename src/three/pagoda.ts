@@ -159,8 +159,8 @@ function clusterPositions(R: number): { x: number; z: number; ry: number }[] {
 function roofFaceGeo(Rridge: number, Reave: number, h: number, upturn: number, k: number): THREE.BufferGeometry {
   const a0 = (Math.PI / 4) * k - OROT // 左角
   const a1 = (Math.PI / 4) * (k + 1) - OROT // 右角
-  const NR = 4 // 径向分段
-  const NA = 3 // 角向分段
+  const NR = 8 // 径向分段
+  const NA = 6 // 角向分段
   const pos: number[] = []
   const uvArr: number[] = []
   const idx: number[] = []

@@ -95,8 +95,8 @@ function roofFace(
   upA: number,
   upB: number,
 ): THREE.BufferGeometry {
-  const NR = 4
-  const NA = 4
+  const NR = 8
+  const NA = 8
   const faceW = botA.distanceTo(botB)
   const slopeL = Math.max(1, topA.clone().lerp(topB, 0.5).distanceTo(botA.clone().lerp(botB, 0.5)))
   const pos: number[] = []

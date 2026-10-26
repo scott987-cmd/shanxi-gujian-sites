@@ -64,7 +64,7 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
     renderer.setClearColor(0x272d36)
     renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.12
+    renderer.toneMappingExposure = 1.16
     host.appendChild(renderer.domElement)
 
     const scene = new THREE.Scene()
