@@ -69,6 +69,7 @@ export interface SignatureInfo {
   sub: string
   desc: string
   visual: 'dougong' | 'beams' | 'glaze' | 'stars' | 'sculptures' | 'mural' | 'bridge' | 'shelf'
+  jumps?: number
   stats: [string, string][]
   items?: { name: string; desc: string }[]
 }
@@ -97,4 +98,5 @@ export interface BuildingConfig {
   planZones: PlanZone[]
   legacy: LegacyInfo
   signature: SignatureInfo
+  jointType?: 'default' | 'chashou' | 'cliff-beam' | 'glaze' | 'panlong' | 'statue'
 }

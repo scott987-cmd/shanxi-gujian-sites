@@ -443,7 +443,7 @@ export const HERO_STATS = [
 export interface JointPartInfo {
   id: string
   name: string
-  group: '斗拱（左）' | '叉柱造（右）'
+  group: string
   desc: string
 }
 

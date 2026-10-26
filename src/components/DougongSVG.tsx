@@ -23,15 +23,23 @@ const LAYERS: Layer[] = [
   { id: 'fang', name: '撩檐枋', desc: '斗拱顶端的通长木枋，直接承托屋檐', w: 224, h: 12, beam: true, blocks: 'ends' },
 ]
 
-export default function DougongSVG({ explode, selected, onSelect }: { explode: number; selected: string | null; onSelect: (id: string) => void }) {
-  const baseH = useMemo(() => LAYERS.reduce((s, l) => s + l.h, 0), [])
-  const extra = explode * GAP * (LAYERS.length - 1)
+export default function DougongSVG({ explode, selected, onSelect, jumps = 5 }: { explode: number; selected: string | null; onSelect: (id: string) => void; jumps?: number }) {
+  const LAYERS_ALL = useMemo(() => {
+    if (jumps >= 7) {
+      const arr = [...LAYERS]
+      arr.splice(4, 0, { id: 'ang2', name: '下昂 · 第二跳', desc: '七铺作的第二重斜昂：再出跳一步，把屋檐挑得更远。', w: 188, h: 15, slant: true, blocks: 'ends' as const })
+      return arr
+    }
+    return LAYERS
+  }, [jumps])
+  const baseH = useMemo(() => LAYERS_ALL.reduce((s, l) => s + l.h, 0), [LAYERS_ALL])
+  const extra = explode * GAP * (LAYERS_ALL.length - 1)
   const viewH = 40 + baseH + extra + 30
   const bottomY = viewH - 26
 
   const positioned = useMemo(() => {
     let cursor = bottomY
-    return LAYERS.map((l, i) => {
+    return LAYERS_ALL.map((l, i) => {
       const yBot = cursor
       const yTop = yBot - l.h
       cursor = yTop

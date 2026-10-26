@@ -10,6 +10,7 @@ const LAYER_DESCS: Record<string, { name: string; desc: string }> = {
   nidao: { name: '泥道栱', desc: '与华栱十字相扣的横栱，把出跳结构稳稳锁在柱头轴线上。' },
   ang: { name: '下昂', desc: '一根斜置的杠杆：前端挑着深远的屋檐，后端被梁架压住，用杠杆原理“举”起出檐。' },
   ling: { name: '令栱', desc: '最外一跳的横栱，托住撩檐枋。' },
+  ang2: { name: '下昂 · 第二跳', desc: '七铺作的第二重斜昂，把出檐再挑远一步。' },
   fang: { name: '撩檐枋', desc: '架在斗拱顶端的通长木枋，直接承托屋檐，并串联各攒斗拱成整体。' },
 }
 
@@ -34,7 +35,7 @@ export default function SignatureLab({ config }: { config: BuildingConfig }) {
           <div className="rounded-2xl border border-[#d8cdb4] bg-[#faf6ec] p-4 shadow-sm md:p-6">
             {sig.visual === 'dougong' && (
               <>
-                <DougongSVG explode={explode} selected={sel} onSelect={(id) => setSel(id === '' ? null : id)} />
+                <DougongSVG explode={explode} selected={sel} onSelect={(id) => setSel(id === '' ? null : id)} jumps={sig.jumps ?? 5} />
                 <div className="mt-4 px-2">
                   <div className="mb-2 flex justify-between text-xs text-[#8a7f6a]">
                     <span>分解斗拱</span>

@@ -109,6 +109,7 @@ export const feihongta: BuildingConfig = {
   location: '山西临汾 · 洪洞县广胜寺',
   geo: [111.68, 36.29, 0, 0],
   archetype: 'tower',
+  jointType: 'glaze',
   tower: { stories: 13, glaze: true },
   tagline:
     '明代正德至嘉靖年间，十三层琉璃宝塔在霍山之巅重建完成。木塔会朽，砖塔会老，而飞虹塔把整座建筑烧成了陶瓷——五百年过去，琉璃上的菩萨与莲花仍然鲜艳如初。',
@@ -165,6 +166,7 @@ export const shuanglinsi: BuildingConfig = {
   location: '山西晋中 · 平遥县',
   geo: [112.19, 37.2, -0.08, 0.04],
   archetype: 'hall',
+  jointType: 'statue',
   tagline:
     '平遥城外的双林寺，十座殿宇里住着两千余尊彩塑。千手观音慈悲低垂，韦驮将军扭身怒目——被行家称为“天下第一韦驮”。这里的木头是骨架，泥巴才是灵魂。',
   heroStats: [
@@ -254,6 +256,7 @@ export const zhenguosi: BuildingConfig = {
   location: '山西晋中 · 平遥县',
   geo: [112.24, 37.24, 0.08, -0.04],
   archetype: 'hall',
+  jointType: 'chashou',
   tagline:
     '公元 963 年，五代十国的乱世里，北汉小国在平遥城外建起这座佛殿。它没有唐代前辈的名气，却是中国现存最古老的木构之一——殿内十一尊五代彩塑，是敦煌之外仅存的五代寺观彩塑。',
   heroStats: [
@@ -316,6 +319,7 @@ export const zhenguosi: BuildingConfig = {
   signature: {
     title: '七铺作斗拱', sub: '五代豪奢 · 小殿大拱', visual: 'dougong',
     desc: '三间小殿却用七铺作双杪双下昂——斗拱总高超过柱高一半，出檐如伞。五代匠人对唐构规制的最后致敬。',
+    jumps: 7,
     stats: [['七铺作', '双杪双下昂'], ['过半', '拱高/柱高'], ['五代', '原构']],
   },
   legacy: {
@@ -333,6 +337,7 @@ export const chongfusi: BuildingConfig = {
   location: '山西朔州 · 朔城区',
   geo: [112.43, 39.31, 0, 0],
   archetype: 'hall',
+  jointType: 'panlong',
   tagline:
     '金皇统三年（1143 年）建成的弥陀殿，面阔七间 41 米，与八百年前相比几乎未变。琉璃脊饰、菱花门窗、金代壁画、塑像与匾额同殿共存，被称为“崇福五绝”——一座殿就是一部金代艺术全集。',
   heroStats: [

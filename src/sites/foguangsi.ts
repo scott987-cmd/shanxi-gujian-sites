@@ -8,6 +8,7 @@ export const foguangsi: BuildingConfig = {
   location: '山西忻州 · 五台县佛光山',
   geo: [113.42, 38.95, 0.1, 0.06],
   archetype: 'hall',
+  jointType: 'chashou',
   tagline:
     '公元 857 年，唐大中十一年，长安女弟子宁公遇施资、高僧愿诚主持重建。1937 年，梁思成、林徽因循着敦煌壁画《五台山图》的线索找到它，一举打破“中国已无唐代木构”的断言。',
   heroStats: [
@@ -118,6 +119,7 @@ export const foguangsi: BuildingConfig = {
   signature: {
     title: '七铺作斗拱', sub: '双杪双下昂 · 唐代雄构', visual: 'dougong',
     desc: '东大殿柱头铺作为七铺作双杪双下昂——出跳四层、两层斜昂，斗拱总高近柱高之半。唐代斗拱是挑檐的结构主力，近 4 米的出檐全靠它层层递出。',
+    jumps: 7,
     stats: [['七铺作', '出跳四层'], ['双下昂', '杠杆挑檐'], ['近 4m', '出檐深远']],
   },
   legacy: {

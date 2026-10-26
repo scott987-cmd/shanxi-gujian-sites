@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { JOINT_PARTS } from '@/data/pagoda'
+import { JOINT_VARIANT_PARTS } from '@/three/jointVariants'
 import type { BuildingConfig } from '@/sites/types'
 import PagodaCanvas from '@/components/PagodaCanvas'
 import PlanView, { PLAN_INFO } from '@/components/PlanView'
@@ -45,6 +46,7 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
   const [seeThrough, setSeeThrough] = useState(false)
   const [autoRotate, setAutoRotate] = useState(true)
   const [planSel, setPlanSel] = useState<string | null>(null)
+  const [burstTs, setBurstTs] = useState(0)
   const rowRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   useEffect(() => {
@@ -61,10 +63,17 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
   }
 
   const rows = [...config.parts].reverse()
-  const jointGroups = [
-    { name: '斗拱（左）', items: JOINT_PARTS.filter((j) => j.group === '斗拱（左）') },
-    { name: '叉柱造（右）', items: JOINT_PARTS.filter((j) => j.group === '叉柱造（右）') },
-  ]
+  const jt = config.jointType ?? 'default'
+  const jointGroups =
+    jt === 'default'
+      ? [
+          { name: '斗拱（左）', items: JOINT_PARTS.filter((j) => j.group === '斗拱（左）') },
+          { name: '叉柱造（右）', items: JOINT_PARTS.filter((j) => j.group === '叉柱造（右）') },
+        ]
+      : JOINT_VARIANT_PARTS[jt].map((g) => ({
+          name: g.name,
+          items: g.parts.length > 0 ? g.parts : JOINT_PARTS.filter((j) => j.group === '斗拱（左）'),
+        }))
 
   const TOWER_PLAN_ZONES = [
     { id: 'wall', title: '琉璃外壁', desc: '外壁满贴琉璃构件：佛龛、菩萨、花卉、祥兽，釉彩五百年不褪。' },
@@ -171,6 +180,7 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
                     mode={mode}
                     explode={explode}
                     spread={spread}
+                    burstTs={burstTs}
                     selectedId={selectedId}
                     onSelect={setSelectedId}
                     seeThrough={seeThrough}
@@ -212,6 +222,25 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
                     </div>
                   )}
                 </div>
+                <button
+                  onClick={() => {
+                    setExplode(1)
+                    setSpread(1)
+                    setBurstTs(Date.now())
+                  }}
+                  className="rounded-full bg-[#a63d2a] px-4 py-1.5 text-xs font-medium text-[#f7f1e3] transition hover:bg-[#bf4a35]"
+                >
+                  💥 瞬间爆炸
+                </button>
+                <button
+                  onClick={() => {
+                    setExplode(0)
+                    setSpread(0)
+                  }}
+                  className="rounded-full border border-[#6b5f4c] px-4 py-1.5 text-xs text-[#a89c80] transition hover:border-[#c9a227]"
+                >
+                  合拢
+                </button>
                 <button
                   onClick={() => setAutoRotate(!autoRotate)}
                   className={`rounded-full border px-4 py-1.5 text-xs transition ${

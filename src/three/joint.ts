@@ -84,7 +84,7 @@ const WOOD_D = 0x66422a
 const DOU = 0x5c3a21
 const ANG = 0xc9a227
 
-function box(
+export function box(
   w: number,
   h: number,
   d: number,
@@ -103,7 +103,7 @@ function box(
   return m
 }
 
-function cyl(r: number, h: number, x: number, y: number, z: number, color: number): THREE.Mesh {
+export function cyl(r: number, h: number, x: number, y: number, z: number, color: number): THREE.Mesh {
   const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 1.06, h, 12), new THREE.MeshStandardMaterial({ color, roughness: 0.8 }))
   m.position.set(x, y, z)
   m.castShadow = true
@@ -111,14 +111,14 @@ function cyl(r: number, h: number, x: number, y: number, z: number, color: numbe
   return m
 }
 
-function addBlock(group: THREE.Group, blocks: JointBlock[], id: string, mesh: THREE.Mesh, index: number) {
+export function addBlock(group: THREE.Group, blocks: JointBlock[], id: string, mesh: THREE.Mesh, index: number) {
   mesh.userData.blockId = id
   group.add(mesh)
   blocks.push({ id, mesh, baseY: mesh.position.y, index })
 }
 
 // 组合若干 mesh 为一个 id 的块（返回合并 mesh）
-function merged(id: string, meshes: THREE.Mesh[], color: number): THREE.Mesh {
+export function merged(id: string, meshes: THREE.Mesh[], color: number): THREE.Mesh {
   const geos = meshes.map((m) => {
     m.updateMatrix()
     const g = m.geometry.clone().applyMatrix4(m.matrix)

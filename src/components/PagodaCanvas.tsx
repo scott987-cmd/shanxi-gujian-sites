@@ -4,7 +4,8 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { buildPagoda, buildGenericTower, type PagodaModel } from '@/three/pagoda'
 import { buildHall } from '@/three/hall'
 import { buildCliff } from '@/three/cliff'
-import { buildJoint, type JointModel } from '@/three/joint'
+import { buildJointOf } from '@/three/jointVariants'
+import type { JointModel } from '@/three/joint'
 import { buildEnvironment } from '@/three/env'
 import type { BuildingConfig } from '@/sites/types'
 
@@ -17,6 +18,7 @@ export interface PagodaCanvasProps {
   onSelect: (id: string | null) => void
   seeThrough: boolean
   autoRotate: boolean
+  burstTs: number
 }
 
 interface CamPreset {
@@ -31,7 +33,7 @@ interface CamPreset {
 
 const CAM_JOINT = { pos: new THREE.Vector3(4.5, 8, 18.5), tgt: new THREE.Vector3(0, 5, 0) }
 
-export default function PagodaCanvas({ config, mode, explode, spread, selectedId, onSelect, seeThrough, autoRotate }: PagodaCanvasProps) {
+export default function PagodaCanvas({ config, mode, explode, spread, selectedId, onSelect, seeThrough, autoRotate, burstTs }: PagodaCanvasProps) {
   const hostRef = useRef<HTMLDivElement>(null)
   const stateRef = useRef<{
     renderer: THREE.WebGLRenderer
@@ -46,6 +48,7 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     explodeCur: number
     radialCur: number
   } | null>(null)
+  const burstRef = useRef<{ active: boolean; t: number }>({ active: false, t: 0 })
 
   const propsRef = useRef({ mode, explode, spread, selectedId, seeThrough, autoRotate, onSelect })
   propsRef.current = { mode, explode, spread, selectedId, seeThrough, autoRotate, onSelect }
@@ -113,7 +116,7 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     // 模型（按建筑类型选引擎）
     const pagoda = config.archetype === 'pagoda' ? buildPagoda() : config.archetype === 'tower' ? buildGenericTower(config.tower!.stories, config.tower!.glaze) : config.archetype === 'cliff' ? buildCliff() : buildHall(config.hall!)
     scene.add(pagoda.group)
-    const joint = buildJoint()
+    const joint = buildJointOf(config.jointType ?? 'default')
     joint.group.visible = false
     scene.add(joint.group)
 
@@ -288,6 +291,11 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  // 瞬间爆炸触发
+  useEffect(() => {
+    if (burstTs > 0) burstRef.current = { active: true, t: 0 }
+  }, [burstTs])
 
   // 模式切换：相机跳位
   useEffect(() => {
