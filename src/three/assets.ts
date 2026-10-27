@@ -18,6 +18,9 @@ export function loadGLB(url: string): Promise<THREE.Group | null> {
 
 // 缩放到目标高度，底部对齐 y=0，水平居中
 export function fitToHeight(obj: THREE.Object3D, h: number) {
+  // 幂等：先复位缩放与位置，避免双挂载/缓存复用时把上次的变换读进测量
+  obj.scale.setScalar(1)
+  obj.position.set(0, 0, 0)
   const box = new THREE.Box3().setFromObject(obj)
   const size = box.getSize(new THREE.Vector3())
   const s = h / size.y
@@ -63,4 +66,18 @@ export function swapModel(
       }
     }
   }
+}
+
+// 整楼模型加载并按目标高度缩放
+export async function loadBuildingModel(id: string, totalHeight: number): Promise<THREE.Group | null> {
+  const m = await loadGLB(`/models/building-${id}.glb`)
+  if (!m) return null
+  fitToHeight(m, totalHeight)
+  m.traverse((o) => {
+    if (o instanceof THREE.Mesh) {
+      o.castShadow = true
+      o.receiveShadow = true
+    }
+  })
+  return m
 }

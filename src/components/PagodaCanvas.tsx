@@ -9,6 +9,8 @@ import { buildJointOf } from '@/three/jointVariants'
 import type { JointModel } from '@/three/joint'
 import { buildEnvironment } from '@/three/env'
 import { loadGLB, swapModel } from '@/three/assets'
+import { fitToHeight, loadBuildingModel } from '@/three/assets'
+import { createParticleBurst, type ParticleBurst } from '@/three/particles'
 import type { BuildingConfig } from '@/sites/types'
 
 export interface PagodaCanvasProps {
@@ -22,6 +24,7 @@ export interface PagodaCanvasProps {
   autoRotate: boolean
   burstTs: number
   slowMo: boolean
+  realistic: boolean
 }
 
 interface CamPreset {
@@ -36,7 +39,7 @@ interface CamPreset {
 
 const CAM_JOINT = { pos: new THREE.Vector3(4.5, 8, 18.5), tgt: new THREE.Vector3(0, 5, 0) }
 
-export default function PagodaCanvas({ config, mode, explode, spread, selectedId, onSelect, seeThrough, autoRotate, burstTs, slowMo }: PagodaCanvasProps) {
+export default function PagodaCanvas({ config, mode, explode, spread, selectedId, onSelect, seeThrough, autoRotate, burstTs, slowMo, realistic }: PagodaCanvasProps) {
   const hostRef = useRef<HTMLDivElement>(null)
   const stateRef = useRef<{
     renderer: THREE.WebGLRenderer
@@ -50,11 +53,14 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     raycaster: THREE.Raycaster
     explodeCur: number
     radialCur: number
+    realModel: THREE.Group | null
+    realScaled: boolean
+    particles: ParticleBurst | null
   } | null>(null)
   const burstRef = useRef<{ active: boolean; t: number }>({ active: false, t: 0 })
 
-  const propsRef = useRef({ mode, explode, spread, selectedId, seeThrough, autoRotate, onSelect, slowMo })
-  propsRef.current = { mode, explode, spread, selectedId, seeThrough, autoRotate, onSelect, slowMo }
+  const propsRef = useRef({ mode, explode, spread, selectedId, seeThrough, autoRotate, onSelect, slowMo, realistic })
+  propsRef.current = { mode, explode, spread, selectedId, seeThrough, autoRotate, onSelect, slowMo, realistic }
 
   // 初始化（仅一次）
   useEffect(() => {
@@ -168,7 +174,15 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
 
     const raycaster = new THREE.Raycaster()
 
-    stateRef.current = { renderer, scene, camera, controls, pagoda, joint, env, cam, raycaster, explodeCur: 0, radialCur: 0 }
+    // 整楼写实模型（Tripo 生成）
+    let realModel: THREE.Group | null = null
+    void loadBuildingModel(config.id, pagoda.totalHeight).then((m) => {
+      if (!m) return
+      if (stateRef.current) stateRef.current.realModel = m
+      scene.add(m)
+    })
+
+    stateRef.current = { renderer, scene, camera, controls, pagoda, joint, env, cam, raycaster, explodeCur: 0, radialCur: 0, realModel, realScaled: false, particles: null }
 
     // 尺寸
     const resize = () => {
@@ -219,7 +233,13 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
       const p = propsRef.current
       const st = stateRef.current!
 
-      pagoda.group.visible = p.mode === 'pagoda'
+      if (st.realModel && !st.realScaled) {
+        fitToHeight(st.realModel, pagoda.totalHeight)
+        st.realScaled = true
+      }
+      const useReal = p.realistic && st.realModel !== null
+      pagoda.group.visible = p.mode === 'pagoda' && !useReal
+      if (st.realModel) st.realModel.visible = p.mode === 'pagoda' && useReal
       joint.group.visible = p.mode === 'joint'
       env.visible = p.mode === 'pagoda'
 
@@ -239,7 +259,18 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
       const e = st.explodeCur
       const r = st.radialCur
       for (const l of pagoda.layers) {
-        l.obj.position.y = l.baseY + e * l.index * st.cam.spacing
+        l.obj.position.y = l.baseY
+      }
+      // 粒子爆炸：点云从模型表面飞散
+      if (p.mode === 'pagoda') {
+        if (e > 0.02 && !st.particles) {
+          const src = useReal && st.realModel ? st.realModel : pagoda.group
+          st.particles = createParticleBurst(src)
+          scene.add(st.particles.points)
+        }
+        if (st.particles) st.particles.setProgress(e)
+      } else if (st.particles) {
+        st.particles.points.visible = false
       }
       for (const b of joint.blocks) {
         b.mesh.position.y = b.baseY + e * b.index * 0.42
@@ -256,7 +287,7 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
       const baseY = p.mode === 'pagoda' ? st.cam.baseY : 5
       const liftK = p.mode === 'pagoda' ? st.cam.liftK : 2
       const scaleK = p.mode === 'pagoda' ? st.cam.scaleK : 0.25
-      const want = baseY + e * liftK
+      const want = baseY + e * liftK * 0.35
       controls.target.y += (want - controls.target.y) * 0.06
       const scale = 1 + e * scaleK + r * st.cam.spreadK
       const factor = scale / prevDistScale
