@@ -237,7 +237,9 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
         fitToHeight(st.realModel, pagoda.totalHeight)
         st.realScaled = true
       }
-      const useReal = p.realistic && st.realModel !== null
+      // 拆解/散开时必须用结构模型，合拢时才展示写实整楼
+      const disassembling = st.explodeCur > 0.03 || st.radialCur > 0.03
+      const useReal = p.realistic && st.realModel !== null && !disassembling
       pagoda.group.visible = p.mode === 'pagoda' && !useReal
       if (st.realModel) st.realModel.visible = p.mode === 'pagoda' && useReal
       joint.group.visible = p.mode === 'joint'
@@ -251,7 +253,15 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
         const ease = 1 + (sBack + 1) * Math.pow(t - 1, 3) + sBack * Math.pow(t - 1, 2)
         st.explodeCur = ease
         st.radialCur = ease
-        if (t >= 1) burstRef.current.active = false
+        // 粒子仅作开场闪爆，之后进入分层拆解
+        if (st.particles) {
+          if (t < 0.55) st.particles.setProgress(Math.min(1, t * 1.6))
+          else st.particles.points.visible = false
+        }
+        if (t >= 1) {
+          burstRef.current.active = false
+          if (st.particles) st.particles.points.visible = false
+        }
       } else {
         st.explodeCur += (p.explode - st.explodeCur) * 0.09
         st.radialCur += (p.spread - st.radialCur) * 0.09
@@ -259,17 +269,16 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
       const e = st.explodeCur
       const r = st.radialCur
       for (const l of pagoda.layers) {
-        l.obj.position.y = l.baseY
+        l.obj.position.y = l.baseY + e * l.index * st.cam.spacing
       }
       // 粒子爆炸：点云从模型表面飞散
-      if (p.mode === 'pagoda') {
+      if (p.mode === 'pagoda' && burstRef.current.active) {
         if (e > 0.02 && !st.particles) {
           const src = useReal && st.realModel ? st.realModel : pagoda.group
           st.particles = createParticleBurst(src)
           scene.add(st.particles.points)
         }
-        if (st.particles) st.particles.setProgress(e)
-      } else if (st.particles) {
+      } else if (st.particles && !burstRef.current.active) {
         st.particles.points.visible = false
       }
       for (const b of joint.blocks) {
@@ -287,9 +296,9 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
       const baseY = p.mode === 'pagoda' ? st.cam.baseY : 5
       const liftK = p.mode === 'pagoda' ? st.cam.liftK : 2
       const scaleK = p.mode === 'pagoda' ? st.cam.scaleK : 0.25
-      const want = baseY + e * liftK * 0.35
+      const want = baseY + e * liftK * 0.5
       controls.target.y += (want - controls.target.y) * 0.06
-      const scale = 1 + e * scaleK + r * st.cam.spreadK
+      const scale = 1 + e * scaleK * 2.2 + r * st.cam.spreadK
       const factor = scale / prevDistScale
       prevDistScale = scale
       if (Math.abs(factor - 1) > 0.0001) {
