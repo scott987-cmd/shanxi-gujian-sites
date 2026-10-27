@@ -56,6 +56,7 @@ export interface HallParams {
   floors?: number // 楼阁层数（默认 1）
   statues: { x: number; z: number; s: number; ry?: number }[]
   statueColor?: number // 造像主色（金/彩绘）
+  statueModels?: Record<number, string> // 指定某尊造像用专用 GLB（如 weituo）
   plaqueTexts: string[] // 明间正中大匾
   water?: boolean // 殿前水池与十字飞梁（晋祠）
   dragonColumns?: boolean // 前檐蟠龙柱（晋祠）

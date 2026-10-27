@@ -285,6 +285,8 @@ export function buddhaGeo(): THREE.BufferGeometry {
 
 function placeBuddha(parent: THREE.Group, m: THREE.Material, x: number, z: number, s: number, ry = 0) {
   const b = new THREE.Mesh(buddhaGeo(), m)
+  b.userData.buddha = true
+  b.userData.buddhaH = 2.24 * s
   b.position.set(x, 0, z)
   b.scale.setScalar(s)
   b.rotation.y = ry
@@ -620,6 +622,8 @@ export function buildPagoda(): PagodaModel {
       const geo = bracketClusterGeo(scale)
       for (const c of clusterPositions(R - 0.4)) {
         const m = new THREE.Mesh(geo, mBr)
+        m.userData.bracket = true
+        m.userData.bracketH = 2.1 * scale
         m.position.set(c.x, 0, c.z)
         m.rotation.y = c.ry
         g.add(m)

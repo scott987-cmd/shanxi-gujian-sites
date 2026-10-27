@@ -375,6 +375,8 @@ export function buildHall(cfg: HallParams): PagodaModel {
           head.translate(0.55, 5.1, 0)
           geos.push(head)
           const dragon = new THREE.Mesh(mergeGeometries(geos)!, dragonMat)
+          dragon.userData.panlong = true
+          dragon.userData.panlongH = 4.4
           dragon.position.set(dx, 0, Dl / 2)
           g.add(dragon)
           addRadial(dragon, 0.3)
@@ -460,6 +462,8 @@ export function buildHall(cfg: HallParams): PagodaModel {
       }
       for (const s of spots) {
         const m = new THREE.Mesh(geo, mBr)
+        m.userData.bracket = true
+        m.userData.bracketH = 2.1 * cfg.bracketSize
         m.position.set(s.x, 0, s.z)
         m.rotation.y = s.ry
         g.add(m)
@@ -657,6 +661,8 @@ export function buildHall(cfg: HallParams): PagodaModel {
     g.add(new THREE.Mesh(mergeGeometries(ridges)!, mRidge))
     for (const sx of [-1, 1]) {
       const orn = new THREE.Mesh(new THREE.ConeGeometry(0.55, 1.6, 6), mOrn)
+      orn.userData.chiwen = true
+      orn.userData.chiwenH = 1.6
       orn.position.set((sx * ridgeLen) / 2, 1.1, 0)
       orn.scale.z = 0.5
       g.add(orn)

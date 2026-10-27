@@ -8,6 +8,7 @@ import { buildCliff } from '@/three/cliff'
 import { buildJointOf } from '@/three/jointVariants'
 import type { JointModel } from '@/three/joint'
 import { buildEnvironment } from '@/three/env'
+import { loadGLB, swapModel } from '@/three/assets'
 import type { BuildingConfig } from '@/sites/types'
 
 export interface PagodaCanvasProps {
@@ -123,6 +124,20 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     // 模型（按建筑类型选引擎）
     const pagoda = config.archetype === 'pagoda' ? buildPagoda() : config.archetype === 'tower' ? buildGenericTower(config.tower!.stories, config.tower!.glaze) : config.archetype === 'cliff' ? buildCliff() : buildHall(config.hall!)
     scene.add(pagoda.group)
+    // Tripo 高精度模型替换斗拱与佛像（保留可拆解结构）
+    void Promise.all([
+      loadGLB('/models/dougong.glb'),
+      loadGLB('/models/buddha.glb'),
+      loadGLB('/models/chiwen.glb'),
+      loadGLB('/models/weituo.glb'),
+      loadGLB('/models/panlong.glb'),
+    ]).then(([dg, bud, cw, wt, pl]) => {
+      if (dg) swapModel(pagoda.group, 'bracket', dg, pagoda.radialParts)
+      if (bud) swapModel(pagoda.group, 'buddha', bud, pagoda.radialParts)
+      if (cw) swapModel(pagoda.group, 'chiwen', cw, pagoda.radialParts)
+      if (wt) swapModel(pagoda.group, 'weituo', wt, pagoda.radialParts)
+      if (pl) swapModel(pagoda.group, 'panlong', pl, pagoda.radialParts)
+    })
     const joint = buildJointOf(config.jointType ?? 'default')
     joint.group.visible = false
     scene.add(joint.group)

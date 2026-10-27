@@ -190,6 +190,7 @@ export const shuanglinsi: BuildingConfig = {
     innerColRows: 1,
     bracketSize: 0.95,
     statueColor: 13209450,
+    statueModels: { 1: 'weituo' },
     statues: [
       { x: 0, z: -2, s: 1.3 },
       { x: -2.5, z: -1.4, s: 0.85 },
