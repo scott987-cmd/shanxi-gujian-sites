@@ -1,7 +1,19 @@
 import { SITES } from '../sites'
+import { useState } from 'react'
+
+// 朝代归属（以主体遗构年代为准）
+const DYN: Record<string, string> = {
+  yingxian: '辽', foguangsi: '唐', nanchansi: '唐', jinci: '宋', xuankongsi: '明',
+  huayansi: '辽', shanhuasi: '辽', yonglegong: '元', feihongta: '明', shuanglinsi: '明',
+  zhenguosi: '五代', chongfusi: '金', bianjinglou: '明', tiantaian: '五代', dayunyuan: '五代',
+  longmensi: '宋', chongqingsi: '宋', faxingsi: '宋', qingliansi: '唐', yuhuangmiao: '元',
+}
+const DYNASTIES = ['全部', '唐', '五代', '辽', '宋', '金', '元', '明'] as const
 import ShanxiMap from '../components/ShanxiMap'
 
 export default function Gallery() {
+  const [dynasty, setDynasty] = useState<(typeof DYNASTIES)[number]>('全部')
+  const filtered = dynasty === '全部' ? SITES : SITES.filter((s) => DYN[s.id] === dynasty)
   return (
     <div className="night-texture min-h-screen text-[#efe7d6]">
       <div className="mx-auto max-w-6xl px-6 py-20">
@@ -15,13 +27,29 @@ export default function Gallery() {
           滚动穿越千年历史，亲手把建筑拆成每一根木头。
         </p>
 
-        <div className="mt-14 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]">
+        <div className="mt-10 flex flex-wrap items-center gap-2">
+          <span className="mr-2 text-xs tracking-widest text-[#8a7f6a]">按朝代筛选</span>
+          {DYNASTIES.map((d) => (
+            <button
+              key={d}
+              onClick={() => setDynasty(d)}
+              className={`rounded-full px-4 py-1.5 text-xs tracking-widest transition ${
+                dynasty === d ? 'bg-[#c9a227] font-medium text-[#1d1812]' : 'border border-[#6b5f4c] text-[#a89c80] hover:border-[#c9a227] hover:text-[#c9a227]'
+              }`}
+            >
+              {d}
+            </button>
+          ))}
+          <span className="ml-auto text-xs text-[#8a7f6a]">{filtered.length} 处</span>
+        </div>
+
+        <div className="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]">
           <div className="lg:sticky lg:top-20">
             <h2 className="font-serif-sc mb-4 text-2xl font-bold text-[#e8dcb8]">晋地二十遗珍分布图</h2>
-            <ShanxiMap />
+            <ShanxiMap sites={filtered} />
           </div>
           <div className="grid gap-5 sm:grid-cols-2">
-          {SITES.map((s, i) => (
+          {filtered.map((s, i) => (
             <a
               key={s.id}
               href={`#/s/${s.id}`}

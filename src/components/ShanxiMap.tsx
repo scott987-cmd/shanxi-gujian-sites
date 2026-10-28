@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { SITES } from '../sites'
+import type { BuildingConfig } from '../sites/types'
 
 // 山西省轮廓（示意性简化，经纬度）
 const OUTLINE: [number, number][] = [
@@ -27,7 +27,7 @@ function proj(lng: number, lat: number): [number, number] {
   return [x, y]
 }
 
-export default function ShanxiMap() {
+export default function ShanxiMap({ sites }: { sites: BuildingConfig[] }) {
   const [hover, setHover] = useState<string | null>(null)
   const outline = OUTLINE.map(([lng, lat]) => proj(lng, lat).join(',')).join(' ')
 
@@ -66,7 +66,7 @@ export default function ShanxiMap() {
           )
         })}
         {/* 图钉 */}
-        {SITES.filter((s) => s.geo).map((s, i) => {
+        {sites.filter((s) => s.geo).map((s, i) => {
           const [lng, lat, jx, jy] = s.geo!
           const [x, y] = proj(lng + jx, lat + jy)
           const active = hover === s.id
