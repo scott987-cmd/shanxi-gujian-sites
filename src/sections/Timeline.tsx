@@ -227,7 +227,9 @@ export default function Timeline({ config }: { config: BuildingConfig }) {
           {(() => {
             const generic = sceneOf(item.title, item.desc)
             const isSignature = config.eraMoment && (item.year + item.title + item.desc).includes(config.eraMoment)
-            const scene = isSignature ? `${config.id}-sig` : generic
+            const isModern = /今天|数字|监测|沉浸|AR|扫描|数字档案|数字重生|保护协调/.test(item.title + item.desc)
+            const isStart = /始建|重建|增修|落成|建成|建寺|建殿/.test(item.title)
+            const scene = isSignature ? `${config.id}-sig` : isModern ? `${config.id}-modern` : isStart ? `${config.id}-start` : generic
             return <img key={scene} src={`/heroes/eras/${scene}.jpg`} alt="" className="era-scene-img" />
           })()}
           <div className="era-scene-mask" />
