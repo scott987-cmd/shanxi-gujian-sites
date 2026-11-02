@@ -25,6 +25,7 @@ export interface PagodaCanvasProps {
   burstTs: number
   slowMo: boolean
   realistic: boolean
+  tour: boolean
 }
 
 interface CamPreset {
@@ -39,7 +40,7 @@ interface CamPreset {
 
 const CAM_JOINT = { pos: new THREE.Vector3(4.5, 8, 18.5), tgt: new THREE.Vector3(0, 5, 0) }
 
-export default function PagodaCanvas({ config, mode, explode, spread, selectedId, onSelect, seeThrough, autoRotate, burstTs, slowMo, realistic }: PagodaCanvasProps) {
+export default function PagodaCanvas({ config, mode, explode, spread, selectedId, onSelect, seeThrough, autoRotate, burstTs, slowMo, realistic, tour }: PagodaCanvasProps) {
   const hostRef = useRef<HTMLDivElement>(null)
   const stateRef = useRef<{
     renderer: THREE.WebGLRenderer
@@ -59,8 +60,8 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
   } | null>(null)
   const burstRef = useRef<{ active: boolean; t: number }>({ active: false, t: 0 })
 
-  const propsRef = useRef({ mode, explode, spread, selectedId, seeThrough, autoRotate, onSelect, slowMo, realistic })
-  propsRef.current = { mode, explode, spread, selectedId, seeThrough, autoRotate, onSelect, slowMo, realistic }
+  const propsRef = useRef({ mode, explode, spread, selectedId, seeThrough, autoRotate, onSelect, slowMo, realistic, tour })
+  propsRef.current = { mode, explode, spread, selectedId, seeThrough, autoRotate, onSelect, slowMo, realistic, tour }
 
   // 初始化（仅一次）
   useEffect(() => {
@@ -228,6 +229,19 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     // 动画循环
     let raf = 0
     let prevDistScale = 1
+    const clock = new THREE.Clock()
+    let tourTime = 0
+    const tourWaypoints = (cam: CamPreset) => {
+      const d = cam.pos.distanceTo(cam.tgt)
+      const H = cam.baseY
+      return [
+        { pos: new THREE.Vector3(d * 0.62, H * 0.62 + d * 0.2, d * 0.92), tgt: new THREE.Vector3(0, H, 0) },
+        { pos: new THREE.Vector3(-d * 0.75, H * 0.35, d * 0.75), tgt: new THREE.Vector3(0, H * 0.75, 0) },
+        { pos: new THREE.Vector3(-d * 0.7, H * 0.5, -d * 0.8), tgt: new THREE.Vector3(0, H * 0.85, 0) },
+        { pos: new THREE.Vector3(d * 0.1, H * 1.4, d * 0.35), tgt: new THREE.Vector3(0, H * 0.5, 0) },
+        { pos: new THREE.Vector3(d * 0.35, H * 0.5, d * 0.55), tgt: new THREE.Vector3(0, H * 0.55, 0) },
+      ]
+    }
     const tick = () => {
       raf = requestAnimationFrame(tick)
       const p = propsRef.current
@@ -338,7 +352,21 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
         for (const b of joint.blocks) applyEmissive(b.mesh, b.id === p.selectedId)
       }
 
-      controls.autoRotate = p.autoRotate
+      // 电影巡游：缓入缓出的环绕镜头
+      if (p.tour && p.mode === 'pagoda') {
+        tourTime += Math.min(clock.getDelta(), 0.06)
+        const wps = tourWaypoints(st.cam)
+        const leg = 6
+        const idx = Math.floor(tourTime / leg) % wps.length
+        const next = (idx + 1) % wps.length
+        const u0 = (tourTime % leg) / leg
+        const u = u0 * u0 * (3 - 2 * u0)
+        camera.position.lerpVectors(wps[idx].pos, wps[next].pos, u)
+        controls.target.lerpVectors(wps[idx].tgt, wps[next].tgt, u)
+        controls.autoRotate = false
+      } else {
+        controls.autoRotate = p.autoRotate
+      }
       controls.update()
       renderer.render(scene, camera)
     }

@@ -12,6 +12,7 @@ export function createParticleBurst(root: THREE.Object3D): ParticleBurst {
   const dirs: number[] = []
   const speeds: number[] = []
   const ups: number[] = []
+  const colors: number[] = []
   const tmp = new THREE.Vector3()
 
   root.updateMatrixWorld(true)
@@ -30,15 +31,54 @@ export function createParticleBurst(root: THREE.Object3D): ParticleBurst {
       dirs.push(Math.sin(phi) * Math.cos(theta), Math.abs(Math.cos(phi)) * 0.7 + 0.35, Math.sin(phi) * Math.sin(theta))
       speeds.push(0.5 + Math.random() * 1.1)
       ups.push((Math.random() - 0.3) * 8)
+      // 按构件类别分色
+      const m = o.material as THREE.MeshStandardMaterial
+      const hex = m?.color?.getHex() ?? 0x8a5a35
+      let col = new THREE.Color(hex)
+      if (hex === 0x77604a || hex === 0xc9a227) col = new THREE.Color(0xd9b84a) // 斗拱金
+      else if (hex === 0x3f4a55 || hex === 0x2f3841) col = new THREE.Color(0x6a7f95) // 瓦黛青
+      else if (hex === 0x8a5a35 || hex === 0x66422a || hex === 0x7a4e2d) col = new THREE.Color(0xb97a4a) // 木红棕
+      else col = new THREE.Color(hex).lerp(new THREE.Color(0xe6c88a), 0.35)
+      colors.push(col.r, col.g, col.b)
     }
   })
 
-  const count = base.length / 3
+  // 全局上限 6 万粒子（性能）
+  let count = base.length / 3
+  if (count > 40000) {
+    const k = Math.ceil(count / 40000)
+    const nb: number[] = []
+    const nd: number[] = []
+    const ns: number[] = []
+    const nu: number[] = []
+    const nc: number[] = []
+    for (let i = 0; i < count; i += k) {
+      const bi = i * 3
+      nb.push(base[bi], base[bi + 1], base[bi + 2])
+      nd.push(dirs[bi], dirs[bi + 1], dirs[bi + 2])
+      ns.push(speeds[i])
+      nu.push(ups[i])
+      nc.push(colors[bi], colors[bi + 1], colors[bi + 2])
+    }
+    base.length = 0
+    dirs.length = 0
+    speeds.length = 0
+    ups.length = 0
+    colors.length = 0
+    for (const v of nb) base.push(v)
+    for (const v of nd) dirs.push(v)
+    for (const v of ns) speeds.push(v)
+    for (const v of nu) ups.push(v)
+    for (const v of nc) colors.push(v)
+    count = base.length / 3
+  }
   const positions = new Float32Array(base)
   const geom = new THREE.BufferGeometry()
   geom.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+  geom.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3))
   const mat = new THREE.PointsMaterial({
-    color: 0xd8b98a,
+    vertexColors: true,
+    color: 0xffffff,
     size: 0.32,
     sizeAttenuation: true,
     transparent: true,

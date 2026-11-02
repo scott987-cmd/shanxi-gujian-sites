@@ -49,6 +49,7 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
   const [burstTs, setBurstTs] = useState(0)
   const [slowMo, setSlowMo] = useState(false)
   const [realistic, setRealistic] = useState(true)
+  const [tour, setTour] = useState(false)
   const rowRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   useEffect(() => {
@@ -185,6 +186,7 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
                     burstTs={burstTs}
                     slowMo={slowMo}
                     realistic={realistic}
+                    tour={tour}
                     selectedId={selectedId}
                     onSelect={setSelectedId}
                     seeThrough={seeThrough}
@@ -226,6 +228,12 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
                     </div>
                   )}
                 </div>
+                <button
+                  onClick={() => setTour(!tour)}
+                  className={`rounded-full border px-4 py-1.5 text-xs transition ${tour ? 'border-[#c9a227] bg-[#c9a227]/15 text-[#e8dcb8]' : 'border-[#6b5f4c] text-[#a89c80] hover:border-[#c9a227]'}`}
+                >
+                  {tour ? '⏸ 停止巡游' : '🎬 电影巡游'}
+                </button>
                 <button
                   onClick={() => setRealistic(!realistic)}
                   className={`rounded-full border px-4 py-1.5 text-xs transition ${realistic ? 'border-[#c9a227] bg-[#c9a227]/15 text-[#e8dcb8]' : 'border-[#6b5f4c] text-[#a89c80] hover:border-[#c9a227]'}`}
