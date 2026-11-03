@@ -261,7 +261,7 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
 
       // 爆炸动画（缓动）/ 瞬间爆炸（回弹）
       if (burstRef.current.active) {
-        burstRef.current.t = Math.min(1, burstRef.current.t + (slowMo ? 0.012 : 0.05))
+        burstRef.current.t = Math.min(1, burstRef.current.t + (slowMo ? 0.006 : 0.02))
         const t = burstRef.current.t
         const sBack = 1.70158
         const ease = 1 + (sBack + 1) * Math.pow(t - 1, 3) + sBack * Math.pow(t - 1, 2)
@@ -282,8 +282,13 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
       }
       const e = st.explodeCur
       const r = st.radialCur
+      // 错峰解构：自上而下依次分离，每层错峰升起
+      const nL = pagoda.layers.length
       for (const l of pagoda.layers) {
-        l.obj.position.y = l.baseY + e * l.index * st.cam.spacing
+        const delay = ((nL - 1 - l.index) / (nL - 1)) * 0.65 // 顶层先走，底层后到
+        const u = Math.max(0, Math.min(1, (e - delay) / 0.35))
+        const ease = u * u * (3 - 2 * u)
+        l.obj.position.y = l.baseY + ease * l.index * st.cam.spacing
       }
       // 粒子爆炸：点云从模型表面飞散
       if (p.mode === 'pagoda' && burstRef.current.active) {
