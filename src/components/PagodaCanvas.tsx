@@ -400,7 +400,11 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
 
   // 瞬间爆炸触发
   useEffect(() => {
-    if (burstTs > 0) burstRef.current = { active: true, t: 0 }
+    if (burstTs > 0) {
+      burstRef.current = { active: true, t: 0 }
+    } else {
+      burstRef.current.active = false
+    }
   }, [burstTs])
 
   // 模式切换：相机跳位

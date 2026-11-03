@@ -208,7 +208,7 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
                       value={[explode * 100]}
                       max={100}
                       step={1}
-                      onValueChange={([v]) => setExplode(v / 100)}
+                      onValueChange={([v]) => { setExplode(v / 100); setBurstTs(0) }}
                       className="[&_[data-slot=slider-range]]:bg-[#c9a227] [&_[data-slot=slider-thumb]]:border-[#c9a227]"
                     />
                   </div>
@@ -222,7 +222,7 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
                         value={[spread * 100]}
                         max={100}
                         step={1}
-                        onValueChange={([v]) => setSpread(v / 100)}
+                        onValueChange={([v]) => { setSpread(v / 100); setBurstTs(0) }}
                         className="[&_[data-slot=slider-range]]:bg-[#a63d2a] [&_[data-slot=slider-thumb]]:border-[#a63d2a]"
                       />
                     </div>
@@ -260,6 +260,7 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
                   onClick={() => {
                     setExplode(0)
                     setSpread(0)
+                    setBurstTs(0)
                   }}
                   className="rounded-full border border-[#6b5f4c] px-4 py-1.5 text-xs text-[#a89c80] transition hover:border-[#c9a227]"
                 >
