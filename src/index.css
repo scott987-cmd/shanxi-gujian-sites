@@ -188,3 +188,31 @@ html { scroll-behavior: smooth; }
   from { opacity: 0; transform: scale(1.04); }
   to { opacity: 0.22; transform: scale(1); }
 }
+
+
+/* 卫星地图建筑图钉 */
+.site-div-icon {
+  background: transparent !important;
+  border: none !important;
+}
+.site-pin {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid #c9a227;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.55), 0 0 0 2px rgba(29, 24, 18, 0.6);
+  background: #1d1812;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+.site-pin:hover {
+  transform: scale(1.25);
+  box-shadow: 0 4px 16px rgba(201, 162, 39, 0.45), 0 0 0 2px rgba(201, 162, 39, 0.5);
+  z-index: 1000;
+}
+.site-pin img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}

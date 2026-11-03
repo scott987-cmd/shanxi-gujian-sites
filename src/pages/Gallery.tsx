@@ -9,7 +9,7 @@ const DYN: Record<string, string> = {
   longmensi: '宋', chongqingsi: '宋', faxingsi: '宋', qingliansi: '唐', yuhuangmiao: '元',
 }
 const DYNASTIES = ['全部', '唐', '五代', '辽', '宋', '金', '元', '明'] as const
-import ShanxiMap from '../components/ShanxiMap'
+import ShanxiSatelliteMap from '../components/ShanxiSatelliteMap'
 
 export default function Gallery() {
   const [dynasty, setDynasty] = useState<(typeof DYNASTIES)[number]>('全部')
@@ -46,7 +46,7 @@ export default function Gallery() {
         <div className="mt-8 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.35fr)]">
           <div className="lg:sticky lg:top-20">
             <h2 className="font-serif-sc mb-4 text-2xl font-bold text-[#e8dcb8]">晋地二十遗珍分布图</h2>
-            <ShanxiMap sites={filtered} />
+            <ShanxiSatelliteMap sites={filtered} />
           </div>
           <div className="grid gap-5 sm:grid-cols-2">
           {filtered.map((s, i) => (
