@@ -1,6 +1,7 @@
 // GLB 模型加载与适配（Tripo 生成件接入，保留拆解）
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
 
 const cache = new Map<string, Promise<THREE.Group | null>>()
 
@@ -9,7 +10,7 @@ export function loadGLB(url: string): Promise<THREE.Group | null> {
     cache.set(
       url,
       new Promise((resolve) => {
-        new GLTFLoader().load(url, (gltf) => resolve(gltf.scene), undefined, () => resolve(null))
+        new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(url, (gltf) => resolve(gltf.scene), undefined, () => resolve(null))
       }),
     )
   }

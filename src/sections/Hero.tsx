@@ -66,13 +66,15 @@ export default function Hero({ config }: { config: BuildingConfig }) {
 
         <div className="mt-16 flex flex-wrap items-center gap-4">
           <a
-            href="#explorer"
+            href={`#/s/${config.id}`}
+            onClick={(e) => { e.preventDefault(); document.getElementById('explorer')?.scrollIntoView({ behavior: 'smooth' }) }}
             className="rounded-full bg-[#a63d2a] px-7 py-3 text-sm font-medium tracking-widest text-[#f7f1e3] shadow-lg shadow-[#a63d2a]/30 transition hover:bg-[#bf4a35]"
           >
             亲手拆解{config.archetype === 'pagoda' || config.archetype === 'tower' ? '木塔' : '大殿'} →
           </a>
           <a
-            href="#history"
+            href={`#/s/${config.id}`}
+            onClick={(e) => { e.preventDefault(); document.getElementById('history')?.scrollIntoView({ behavior: 'smooth' }) }}
             className="rounded-full border border-[#d8cdb4]/50 px-7 py-3 text-sm tracking-widest text-[#e6dcc4] backdrop-blur transition hover:border-[#c9a227] hover:text-[#c9a227]"
           >
             千年沿革

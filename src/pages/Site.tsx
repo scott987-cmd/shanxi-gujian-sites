@@ -42,7 +42,8 @@ export default function Site({ config }: { config: BuildingConfig }) {
             {NAV.map((n) => (
               <a
                 key={n.id}
-                href={`#${n.id}`}
+                href={`#/s/${config.id}`}
+                onClick={(e) => { e.preventDefault(); document.getElementById(n.id)?.scrollIntoView({ behavior: 'smooth' }) }}
                 className="rounded-full px-4 py-1.5 text-sm text-[#cfc4a8] transition hover:bg-[#c9a227]/15 hover:text-[#c9a227]"
               >
                 {n.label}
