@@ -87,6 +87,7 @@ export interface BuildingConfig {
   location: string
   geo?: [number, number, number, number] // 经度, 纬度, 偏移x, 偏移y（度）
   archetype: 'pagoda' | 'hall' | 'tower' | 'cliff'
+  realisticModel?: boolean // 当前写实模型是否通过形制复核；false 时仅展示结构示意
   envKind?: 'courtyard' | 'mountain'
   tower?: { stories: number; glaze: boolean }
   tagline: string

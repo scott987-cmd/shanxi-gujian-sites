@@ -175,13 +175,15 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
 
     const raycaster = new THREE.Raycaster()
 
-    // 整楼写实模型（Tripo 生成）
+    // 整楼写实模型（仅加载已通过形制复核的版本）
     let realModel: THREE.Group | null = null
-    void loadBuildingModel(config.id, pagoda.totalHeight).then((m) => {
-      if (!m) return
-      if (stateRef.current) stateRef.current.realModel = m
-      scene.add(m)
-    })
+    if (config.realisticModel !== false) {
+      void loadBuildingModel(config.id, pagoda.totalHeight).then((m) => {
+        if (!m) return
+        if (stateRef.current) stateRef.current.realModel = m
+        scene.add(m)
+      })
+    }
 
     stateRef.current = { renderer, scene, camera, controls, pagoda, joint, env, cam, raycaster, explodeCur: 0, radialCur: 0, realModel, realScaled: false, particles: null }
 
