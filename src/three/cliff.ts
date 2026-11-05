@@ -261,5 +261,5 @@ export function buildCliff(): PagodaModel {
     push('roofs', 0, g)
   }
 
-  return { group, layers, wallMats: [], fadeMats: [], radialParts, labelMats, totalHeight: cursor }
+  return { group, layers, wallMats: [], fadeMats: [], radialParts, labelMats, totalHeight: 34 }
 }

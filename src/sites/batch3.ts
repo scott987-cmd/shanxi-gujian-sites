@@ -421,7 +421,7 @@ export const qingliansi: BuildingConfig = {
   location: '山西晋城 · 泽州县硖石山',
   geo: [112.87, 35.61, -0.07, 0.03],
   archetype: 'hall',
-  realisticModel: false,
+  realisticModel: true,
   envKind: 'mountain',
   jointType: 'statue',
   eraMoment: '唐塑六尊',

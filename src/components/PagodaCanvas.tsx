@@ -166,9 +166,9 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
       baseY: size.y * 0.42,
     }
     if (config.archetype === 'cliff') {
-      cam.pos.set(8, 17, 40)
-      cam.tgt.set(0, 13, 0)
-      cam.baseY = 13
+      cam.pos.set(12, 22, 65)
+      cam.tgt.set(0, 14, 0)
+      cam.baseY = 14
     }
     camera.position.copy(cam.pos)
     controls.target.copy(cam.tgt)
@@ -176,13 +176,14 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     const raycaster = new THREE.Raycaster()
 
     // 整楼写实模型（仅加载已通过形制复核的版本）
+    const realTargetHeight = config.id === 'qingliansi' ? pagoda.totalHeight * 3.2 : pagoda.totalHeight
     let realModel: THREE.Group | null = null
     if (config.realisticModel !== false) {
-      void loadBuildingModel(config.id, pagoda.totalHeight).then((m) => {
+      void loadBuildingModel(config.id, realTargetHeight).then((m) => {
         if (!m) return
         if (stateRef.current) stateRef.current.realModel = m
         scene.add(m)
-      })
+      }).catch((error) => console.error('整楼模型适配失败', config.id, error))
     }
 
     stateRef.current = { renderer, scene, camera, controls, pagoda, joint, env, cam, raycaster, explodeCur: 0, radialCur: 0, realModel, realScaled: false, particles: null }
@@ -250,13 +251,29 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
       const st = stateRef.current!
 
       if (st.realModel && !st.realScaled) {
-        fitToHeight(st.realModel, pagoda.totalHeight)
+        fitToHeight(st.realModel, realTargetHeight)
+        if (config.id === 'qingliansi') {
+          // 全景寺院需要按建筑群的实际范围取景，而不是按单殿高度放大
+          const size = new THREE.Box3().setFromObject(st.realModel).getSize(new THREE.Vector3())
+          const d = Math.max(size.x, size.y, size.z)
+          st.camera.position.set(d * 0.62, size.y * 0.72, d * 0.92)
+          st.controls.target.set(0, size.y * 0.36, 0)
+          st.cam.pos.copy(st.camera.position)
+          st.cam.tgt.copy(st.controls.target)
+          st.cam.baseY = size.y * 0.36
+        }
         st.realScaled = true
       }
       // 拆解/散开时必须用结构模型，合拢时才展示写实整楼
       const disassembling = st.explodeCur > 0.03 || st.radialCur > 0.03
       const useReal = p.realistic && st.realModel !== null && !disassembling
-      pagoda.group.visible = p.mode === 'pagoda' && !useReal
+      if (config.archetype === 'cliff') {
+        // 悬空寺写实殿阁仍保留崖壁，避免建筑漂浮在山谷中
+        pagoda.group.visible = p.mode === 'pagoda'
+        for (const l of pagoda.layers) l.obj.visible = useReal ? l.id === 'cliff' : true
+      } else {
+        pagoda.group.visible = p.mode === 'pagoda' && !useReal
+      }
       if (st.realModel) st.realModel.visible = p.mode === 'pagoda' && useReal
       joint.group.visible = p.mode === 'joint'
       env.visible = p.mode === 'pagoda'

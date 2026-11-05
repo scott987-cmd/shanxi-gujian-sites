@@ -4,8 +4,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
 
 const MODEL_BASES = [
-  'https://fastly.jsdelivr.net/gh/scott987-cmd/shanxi-gujian-sites@2a2b28e5b38d3c0adfcc625a566ab1178aa73056/models',
-  'https://gcore.jsdelivr.net/gh/scott987-cmd/shanxi-gujian-sites@2a2b28e5b38d3c0adfcc625a566ab1178aa73056/models',
+  'https://gcore.jsdelivr.net/gh/scott987-cmd/shanxi-gujian-sites@1afe1c78d9941936ca8f9e5ffb94cc99e06b80a7/models',
+  'https://fastly.jsdelivr.net/gh/scott987-cmd/shanxi-gujian-sites@1afe1c78d9941936ca8f9e5ffb94cc99e06b80a7/models',
 ]
 
 const cache = new Map<string, Promise<THREE.Group | null>>()
@@ -21,7 +21,10 @@ export function loadGLB(url: string): Promise<THREE.Group | null> {
             resolve(null)
             return
           }
-          new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(urls[index], (gltf) => resolve(gltf.scene), undefined, () => attempt(index + 1))
+          new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(urls[index], (gltf) => resolve(gltf.scene), undefined, (error) => {
+            console.warn(`模型节点加载失败，尝试备用节点：${urls[index]}`, error)
+            attempt(index + 1)
+          })
         }
         attempt(0)
       }),
