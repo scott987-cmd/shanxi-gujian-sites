@@ -3,6 +3,11 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
 
+const MODEL_BASES = [
+  'https://fastly.jsdelivr.net/gh/scott987-cmd/shanxi-gujian-sites@2a2b28e5b38d3c0adfcc625a566ab1178aa73056/models',
+  'https://gcore.jsdelivr.net/gh/scott987-cmd/shanxi-gujian-sites@2a2b28e5b38d3c0adfcc625a566ab1178aa73056/models',
+]
+
 const cache = new Map<string, Promise<THREE.Group | null>>()
 
 export function loadGLB(url: string): Promise<THREE.Group | null> {
@@ -10,7 +15,15 @@ export function loadGLB(url: string): Promise<THREE.Group | null> {
     cache.set(
       url,
       new Promise((resolve) => {
-        new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(url, (gltf) => resolve(gltf.scene), undefined, () => resolve(null))
+        const urls = url.startsWith('/models/') ? MODEL_BASES.map((base) => `${base}/${url.slice('/models/'.length)}`) : [url]
+        const attempt = (index: number) => {
+          if (index >= urls.length) {
+            resolve(null)
+            return
+          }
+          new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(urls[index], (gltf) => resolve(gltf.scene), undefined, () => attempt(index + 1))
+        }
+        attempt(0)
       }),
     )
   }
