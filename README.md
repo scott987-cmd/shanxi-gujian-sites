@@ -48,3 +48,9 @@ npm run build
 React、TypeScript、Vite、Three.js、Leaflet、Tailwind CSS。
 
 本项目为古建科普演示作品，史实与结构信息整理自公开资料；三维模型用于交互展示与结构理解。
+
+## 开源协议
+
+- 项目代码：MIT License，详见 `LICENSE`。
+- 原创且有权授权的模型与视觉素材：CC BY 4.0，详见 `MODEL-LICENSE.md`。
+- 第三方素材及 AI 服务输出的许可边界，以 `MODEL-LICENSE.md` 中的说明为准。
