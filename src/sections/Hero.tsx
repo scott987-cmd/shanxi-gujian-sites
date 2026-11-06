@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { BuildingConfig } from '@/sites/types'
 import PagodaSVG from '@/components/PagodaSVG'
+import { heroUrl } from '@/heroAssets'
 
 function HallSilhouette({ doubleEave }: { doubleEave: boolean }) {
   return (
@@ -20,19 +21,23 @@ function HallSilhouette({ doubleEave }: { doubleEave: boolean }) {
 
 export default function Hero({ config }: { config: BuildingConfig }) {
   const [imgOk, setImgOk] = useState(true)
+  const [cdnNode, setCdnNode] = useState<0 | 1>(0)
   useEffect(() => {
     const im = new Image()
     im.onload = () => setImgOk(true)
-    im.onerror = () => setImgOk(false)
-    im.src = `/heroes/${config.id}.jpg`
-  }, [config.id])
+    im.onerror = () => {
+      if (cdnNode === 0) setCdnNode(1)
+      else setImgOk(false)
+    }
+    im.src = heroUrl(`${config.id}.jpg`, cdnNode)
+  }, [config.id, cdnNode])
 
   return (
     <section id="hero" className="relative min-h-screen overflow-hidden text-[#efe7d6]">
       {/* 全幅主视觉（AI 艺术图） */}
       {imgOk ? (
         <>
-          <img src={`/heroes/${config.id}.jpg`} alt={config.name} className="absolute inset-0 h-full w-full object-cover" />
+          <img src={heroUrl(`${config.id}.jpg`, cdnNode)} alt={config.name} className="absolute inset-0 h-full w-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#14100c]/95 via-[#14100c]/55 to-transparent" />
           <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-[#14100c]/95 to-transparent" />
         </>

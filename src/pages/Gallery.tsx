@@ -10,6 +10,7 @@ const DYN: Record<string, string> = {
 }
 const DYNASTIES = ['全部', '唐', '五代', '辽', '宋', '金', '元', '明'] as const
 import ShanxiSatelliteMap from '../components/ShanxiSatelliteMap'
+import { heroUrl } from '../heroAssets'
 
 export default function Gallery() {
   const [dynasty, setDynasty] = useState<(typeof DYNASTIES)[number]>('全部')
@@ -56,7 +57,7 @@ export default function Gallery() {
               className="group overflow-hidden rounded-2xl border border-[#4a4032] bg-[#262016] transition hover:-translate-y-1 hover:border-[#c9a227]"
             >
               <div className="relative h-36 w-full overflow-hidden bg-[#1d1812]">
-                <img src={`/heroes/${s.id}.jpg`} alt={s.name} loading="lazy" className="h-full w-full object-cover opacity-85 transition duration-500 group-hover:scale-105 group-hover:opacity-100" />
+                <img src={heroUrl(`${s.id}.jpg`)} onError={(e) => { e.currentTarget.src = heroUrl(`${s.id}.jpg`, 1) }} alt={s.name} loading="lazy" className="h-full w-full object-cover opacity-85 transition duration-500 group-hover:scale-105 group-hover:opacity-100" />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#262016] to-transparent" />
               </div>
               <div className="flex items-center justify-between p-6 pb-0">

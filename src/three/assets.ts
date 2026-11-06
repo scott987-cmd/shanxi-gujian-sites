@@ -4,8 +4,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
 
 const MODEL_BASES = [
-  'https://gcore.jsdelivr.net/gh/scott987-cmd/shanxi-gujian-sites@1afe1c78d9941936ca8f9e5ffb94cc99e06b80a7/models',
-  'https://fastly.jsdelivr.net/gh/scott987-cmd/shanxi-gujian-sites@1afe1c78d9941936ca8f9e5ffb94cc99e06b80a7/models',
+  'https://gcore.jsdelivr.net/gh/scott987-cmd/shanxi-gujian-sites@ab0dcdf0ef3a027116e8ac74b0a837ea759cdb70/models',
+  'https://fastly.jsdelivr.net/gh/scott987-cmd/shanxi-gujian-sites@ab0dcdf0ef3a027116e8ac74b0a837ea759cdb70/models',
 ]
 
 const cache = new Map<string, Promise<THREE.Group | null>>()
@@ -85,15 +85,26 @@ export function swapModel(
   }
 }
 
-// 整楼模型加载并按目标高度缩放
-export async function loadBuildingModel(id: string, totalHeight: number): Promise<THREE.Group | null> {
+// 整楼模型加载并按目标高度缩放；提高斜视屋檐、斗拱时的纹理清晰度
+export async function loadBuildingModel(id: string, totalHeight: number, renderer?: THREE.WebGLRenderer): Promise<THREE.Group | null> {
   const m = await loadGLB(`/models/building-${id}.glb`)
   if (!m) return null
   fitToHeight(m, totalHeight)
+  const anisotropy = renderer?.capabilities.getMaxAnisotropy() ?? 1
   m.traverse((o) => {
     if (o instanceof THREE.Mesh) {
       o.castShadow = true
       o.receiveShadow = true
+      const materials = Array.isArray(o.material) ? o.material : [o.material]
+      for (const material of materials) {
+        for (const slot of ['map', 'normalMap', 'bumpMap', 'roughnessMap', 'metalnessMap', 'aoMap', 'emissiveMap'] as const) {
+          const texture = material[slot]
+          if (texture) {
+            texture.anisotropy = anisotropy
+            texture.needsUpdate = true
+          }
+        }
+      }
     }
   })
   return m

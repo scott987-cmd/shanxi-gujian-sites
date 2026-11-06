@@ -72,7 +72,7 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     renderer.shadowMap.type = THREE.PCFSoftShadowMap
     renderer.setClearColor(0x272d36)
     renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.16
+    renderer.toneMappingExposure = 1.32
     host.appendChild(renderer.domElement)
 
     const scene = new THREE.Scene()
@@ -179,7 +179,7 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     const realTargetHeight = config.id === 'qingliansi' ? pagoda.totalHeight * 3.2 : pagoda.totalHeight
     let realModel: THREE.Group | null = null
     if (config.realisticModel !== false) {
-      void loadBuildingModel(config.id, realTargetHeight).then((m) => {
+      void loadBuildingModel(config.id, realTargetHeight, renderer).then((m) => {
         if (!m) return
         if (stateRef.current) stateRef.current.realModel = m
         scene.add(m)
