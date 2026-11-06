@@ -4,8 +4,8 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js'
 
 const MODEL_BASES = [
-  'https://gcore.jsdelivr.net/gh/scott987-cmd/shanxi-gujian-sites@ab0dcdf0ef3a027116e8ac74b0a837ea759cdb70/models',
-  'https://fastly.jsdelivr.net/gh/scott987-cmd/shanxi-gujian-sites@ab0dcdf0ef3a027116e8ac74b0a837ea759cdb70/models',
+  'https://gcore.jsdelivr.net/gh/scott987-cmd/shanxi-gujian-sites@4c4e0ba9c3bc5839c563f70eac9a356a9d403637/models',
+  'https://fastly.jsdelivr.net/gh/scott987-cmd/shanxi-gujian-sites@4c4e0ba9c3bc5839c563f70eac9a356a9d403637/models',
 ]
 
 const cache = new Map<string, Promise<THREE.Group | null>>()

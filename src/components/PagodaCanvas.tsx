@@ -56,6 +56,7 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     radialCur: number
     realModel: THREE.Group | null
     realScaled: boolean
+    realFailed: boolean
     particles: ParticleBurst | null
   } | null>(null)
   const burstRef = useRef<{ active: boolean; t: number }>({ active: false, t: 0 })
@@ -104,7 +105,7 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     controls.dampingFactor = 0.08
     controls.maxDistance = 400
     controls.minDistance = 3
-    controls.autoRotateSpeed = 0.9
+    controls.autoRotateSpeed = 0.45
 
     // 灯光
     scene.add(new THREE.HemisphereLight(0xfff2dd, 0x4a3a28, 1.0))
@@ -178,15 +179,29 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     // 整楼写实模型（仅加载已通过形制复核的版本）
     const realTargetHeight = config.id === 'qingliansi' ? pagoda.totalHeight * 3.2 : pagoda.totalHeight
     let realModel: THREE.Group | null = null
+    let loading: HTMLDivElement | null = null
     if (config.realisticModel !== false) {
+      host.style.position = 'relative'
+      loading = document.createElement('div')
+      loading.textContent = '高清模型加载中…'
+      loading.style.cssText = 'position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;background:rgba(39,45,54,.72);color:#e8dcb8;font-size:14px;letter-spacing:3px;pointer-events:none'
+      host.appendChild(loading)
       void loadBuildingModel(config.id, realTargetHeight, renderer).then((m) => {
-        if (!m) return
+        loading?.remove()
+        if (!m) {
+          if (stateRef.current) stateRef.current.realFailed = true
+          return
+        }
         if (stateRef.current) stateRef.current.realModel = m
         scene.add(m)
-      }).catch((error) => console.error('整楼模型适配失败', config.id, error))
+      }).catch((error) => {
+        loading?.remove()
+        if (stateRef.current) stateRef.current.realFailed = true
+        console.error('整楼模型适配失败', config.id, error)
+      })
     }
 
-    stateRef.current = { renderer, scene, camera, controls, pagoda, joint, env, cam, raycaster, explodeCur: 0, radialCur: 0, realModel, realScaled: false, particles: null }
+    stateRef.current = { renderer, scene, camera, controls, pagoda, joint, env, cam, raycaster, explodeCur: 0, radialCur: 0, realModel, realScaled: false, realFailed: false, particles: null }
 
     // 尺寸
     const resize = () => {
@@ -267,12 +282,18 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
       // 拆解/散开时必须用结构模型，合拢时才展示写实整楼
       const disassembling = st.explodeCur > 0.03 || st.radialCur > 0.03
       const useReal = p.realistic && st.realModel !== null && !disassembling
+      const waitingReal = p.realistic && config.realisticModel !== false && st.realModel === null && !st.realFailed
       if (config.archetype === 'cliff') {
-        // 悬空寺写实殿阁仍保留崖壁，避免建筑漂浮在山谷中
+        // 正面保留崖壁；转向背面时自动剖开，避免岩体遮死殿阁
         pagoda.group.visible = p.mode === 'pagoda'
-        for (const l of pagoda.layers) l.obj.visible = useReal ? l.id === 'cliff' : true
+        for (const l of pagoda.layers) {
+          // 写实模式只留崖壁；拆解模式显示全部构件，背面统一剖开
+          l.obj.visible = useReal
+            ? l.id === 'cliff' && st.camera.position.z > -2
+            : l.id === 'cliff' ? st.camera.position.z > -2 : !waitingReal
+        }
       } else {
-        pagoda.group.visible = p.mode === 'pagoda' && !useReal
+        pagoda.group.visible = p.mode === 'pagoda' && !useReal && !waitingReal
       }
       if (st.realModel) st.realModel.visible = p.mode === 'pagoda' && useReal
       joint.group.visible = p.mode === 'joint'

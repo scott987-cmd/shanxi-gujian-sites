@@ -44,7 +44,7 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
   const [spread, setSpread] = useState(0)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [seeThrough, setSeeThrough] = useState(false)
-  const [autoRotate, setAutoRotate] = useState(true)
+  const [autoRotate, setAutoRotate] = useState(config.id !== 'qingliansi')
   const [planSel, setPlanSel] = useState<string | null>(null)
   const [burstTs, setBurstTs] = useState(0)
   const [slowMo, setSlowMo] = useState(false)
