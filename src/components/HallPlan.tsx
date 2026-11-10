@@ -10,11 +10,11 @@ export default function HallPlan({
   selected: string | null
   onSelect: (id: string) => void
 }) {
-  const W = 400
+  const W = 420
   const H = 420
   const cx = W / 2
   const cy = H / 2 + 10
-  const scale = Math.min(360 / (params.bays * params.bayW), 300 / (params.depthBays * params.bayD))
+  const scale = Math.min(340 / (params.bays * params.bayW), 300 / (params.depthBays * params.bayD))
   const w = params.bays * params.bayW * scale
   const d = params.depthBays * params.bayD * scale
   const x0 = cx - w / 2
@@ -55,7 +55,7 @@ export default function HallPlan({
         <line x1={cx + 22} y1={y0 + d} x2={x0 + w} y2={y0 + d} stroke="#46525c" strokeWidth={5} />
         <rect x={cx - 3} y={y0 + d - 3} width={6} height={6} fill="#a63d2a" transform={`rotate(45 ${cx} ${y0 + d})`} />
         <text x={cx} y={y0 + d + 20} textAnchor="middle" fontSize={12} fill={hl('door') ? '#a63d2a' : '#5c5142'} className="font-serif-sc">
-          殿门（南）
+          殿门（{params.frontDirection ?? '南'}）
         </text>
       </g>
       {/* 梁枋连线 */}
@@ -93,7 +93,7 @@ export default function HallPlan({
         </text>
       </g>
       <text x={cx} y={H - 14} textAnchor="middle" fontSize={13} fill="#5c5142" className="font-serif-sc">
-        面阔 {params.bays} 间 × 进深 {params.depthBays} 间 · 南面为前
+        面阔 {params.bays} 间 × 进深 {params.depthBays} 间 · {params.frontDirection ?? '南'}面为前
       </text>
     </svg>
   )

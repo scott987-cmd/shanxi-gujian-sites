@@ -4,10 +4,12 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js'
 import { buildPagoda, buildGenericTower, type PagodaModel } from '@/three/pagoda'
 import { buildHall } from '@/three/hall'
+import { buildFoguangHall } from '@/three/foguangHall'
 import { buildCliff } from '@/three/cliff'
 import { buildJointOf } from '@/three/jointVariants'
 import type { JointModel } from '@/three/joint'
 import { buildEnvironment } from '@/three/env'
+import { buildFoguangEnvironment } from '@/three/foguangEnv'
 import { loadGLB, swapModel } from '@/three/assets'
 import { fitToHeight, loadBuildingModel } from '@/three/assets'
 import { createParticleBurst, type ParticleBurst } from '@/three/particles'
@@ -124,13 +126,18 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     const rim = new THREE.DirectionalLight(0x9db4d0, 0.5)
     rim.position.set(-45, 30, -50)
     scene.add(rim)
+    if (config.id === 'foguangsi') {
+      const facadeFill = new THREE.DirectionalLight(0xffe9d0, 0.65)
+      facadeFill.position.set(-18, 20, 48)
+      scene.add(facadeFill)
+    }
 
     // 环境
-    const env = buildEnvironment(config.archetype === 'cliff' || config.envKind === 'mountain' ? 'mountain' : 'courtyard')
+    const env = config.id === 'foguangsi' ? buildFoguangEnvironment() : buildEnvironment(config.archetype === 'cliff' || config.envKind === 'mountain' ? 'mountain' : 'courtyard')
     scene.add(env)
 
-    // 模型（按建筑类型选引擎）
-    const pagoda = config.archetype === 'pagoda' ? buildPagoda() : config.archetype === 'tower' ? buildGenericTower(config.tower!.stories, config.tower!.glaze) : config.archetype === 'cliff' ? buildCliff() : buildHall(config.hall!)
+    // 东大殿采用同一套结构模型兼顾外观和拆解，其他建筑保留既有渲染路径。
+    const pagoda = config.id === 'foguangsi' ? buildFoguangHall(config.hall!) : config.archetype === 'pagoda' ? buildPagoda() : config.archetype === 'tower' ? buildGenericTower(config.tower!.stories, config.tower!.glaze) : config.archetype === 'cliff' ? buildCliff() : buildHall(config.hall!)
     scene.add(pagoda.group)
     // Tripo 高精度模型替换斗拱与佛像（保留可拆解结构）
     void Promise.all([
@@ -171,6 +178,12 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
       cam.tgt.set(0, 14, 0)
       cam.baseY = 14
     }
+    if (config.id === 'foguangsi') {
+      // 东大殿以接近人视的高度呈现七开间立面，避免俯视遮死斗拱与板门。
+      cam.pos.set(dist * 0.20, size.y * 0.60, dist * 1.03)
+      cam.tgt.set(0, size.y * 0.39, 0)
+      cam.baseY = size.y * 0.39
+    }
     camera.position.copy(cam.pos)
     controls.target.copy(cam.tgt)
 
@@ -210,6 +223,15 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
       renderer.setSize(w, h)
       camera.aspect = w / h
       camera.updateProjectionMatrix()
+      if (propsRef.current.mode === 'joint') {
+        const fitScale = Math.max(1, 1.05 / camera.aspect)
+        camera.position.copy(CAM_JOINT.pos).sub(CAM_JOINT.tgt).multiplyScalar(fitScale).add(CAM_JOINT.tgt)
+        controls.target.copy(CAM_JOINT.tgt)
+      } else if (config.id === 'foguangsi') {
+        const fitScale = Math.max(1, 1.05 / camera.aspect)
+        camera.position.copy(cam.pos).sub(cam.tgt).multiplyScalar(fitScale).add(cam.tgt)
+        controls.target.copy(cam.tgt)
+      }
     }
     resize()
     const ro = new ResizeObserver(resize)
@@ -452,10 +474,13 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     const st = stateRef.current
     if (!st) return
     if (mode === 'joint') {
-      st.camera.position.copy(CAM_JOINT.pos)
+      // 窄屏横向视野较小，拉远节点相机以保留完整斗拱，而不是裁掉两侧。
+      const fitScale = Math.max(1, 1.05 / st.camera.aspect)
+      st.camera.position.copy(CAM_JOINT.pos).sub(CAM_JOINT.tgt).multiplyScalar(fitScale).add(CAM_JOINT.tgt)
       st.controls.target.copy(CAM_JOINT.tgt)
     } else {
-      st.camera.position.copy(st.cam.pos)
+      const fitScale = config.id === 'foguangsi' ? Math.max(1, 1.05 / st.camera.aspect) : 1
+      st.camera.position.copy(st.cam.pos).sub(st.cam.tgt).multiplyScalar(fitScale).add(st.cam.tgt)
       st.controls.target.copy(st.cam.tgt)
     }
     st.controls.update()

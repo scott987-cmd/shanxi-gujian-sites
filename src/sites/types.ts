@@ -53,6 +53,7 @@ export interface HallParams {
   doubleEave: boolean
   innerColRows: number // 内槽金柱排数（示意）
   bracketSize: number // 斗拱尺度系数
+  frontDirection?: string // 立面朝向，默认南；佛光寺东大殿坐东朝西
   floors?: number // 楼阁层数（默认 1）
   statues: { x: number; z: number; s: number; ry?: number }[]
   statueColor?: number // 造像主色（金/彩绘）
@@ -87,7 +88,8 @@ export interface BuildingConfig {
   location: string
   geo?: [number, number, number, number] // 经度, 纬度, 偏移x, 偏移y（度）
   archetype: 'pagoda' | 'hall' | 'tower' | 'cliff'
-  realisticModel?: boolean // 当前写实模型是否通过形制复核；false 时仅展示结构示意
+  realisticModel?: boolean // 是否加载整楼写实模型；false 时使用可拆解结构复原
+  modelLabel?: string // 专用模型的形制与精度说明
   envKind?: 'courtyard' | 'mountain'
   tower?: { stories: number; glaze: boolean }
   tagline: string

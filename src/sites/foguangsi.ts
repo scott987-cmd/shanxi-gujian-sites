@@ -8,6 +8,8 @@ export const foguangsi: BuildingConfig = {
   location: '山西忻州 · 五台县佛光山',
   geo: [113.42, 38.95, 0.1, 0.06],
   archetype: 'hall',
+  realisticModel: false,
+  modelLabel: '七开间 · 单檐庑殿 · 构件级复原',
   envKind: 'mountain',
   jointType: 'chashou',
   eraMoment: '1937',
@@ -30,6 +32,7 @@ export const foguangsi: BuildingConfig = {
     doubleEave: false,
     innerColRows: 2,
     bracketSize: 1.45,
+    frontDirection: '西',
     statues: [
       { x: -4.5, z: -2.5, s: 1.6 },
       { x: 0, z: -2.5, s: 1.7 },
@@ -55,8 +58,8 @@ export const foguangsi: BuildingConfig = {
       label: '柱网 · 金厢斗底槽',
       short: '柱网',
       kind: 'columns',
-      desc: '面阔七间、进深四间，檐柱一周加内槽金柱两圈，即《营造法式》所称“金厢斗底槽”。檐柱有明显的“侧脚”（柱脚微向外撇）与“生起”（角柱渐高），让整座大殿向内聚拢、重心内收。',
-      facts: ['面阔七间 34 米', '进深四间 17.66 米', '侧脚 + 生起', '内槽金柱两圈'],
+      desc: '面阔七间、进深四间，檐柱一周加内槽金柱，构成通常所称的“金厢斗底槽”。内外柱网由阑额与梁栿拉结，柱头自明间向角部逐渐生起，形成舒展而稳定的唐代殿堂立面。',
+      facts: ['面阔七间 34 米', '进深四间 17.66 米', '柱头生起 · 角柱略高', '内外两圈柱网'],
     },
     {
       id: 'brackets',
@@ -102,7 +105,7 @@ export const foguangsi: BuildingConfig = {
   ],
   features: [
     { id: 'dougong', title: '雄大斗拱', subtitle: '七铺作 · 双杪双下昂', desc: '斗拱高近柱高之半，出跳四承，把近 4 米的出檐荷载层层传回柱头，兼有极强的减震能力。' },
-    { id: 'cejiao', title: '侧脚与生起', subtitle: '柱身微倾 · 角柱渐高', desc: '檐柱柱脚向外微撇、角柱略高于平柱，整座大殿呈内敛收分之势，抗倾覆能力大增。' },
+    { id: 'cejiao', title: '柱头生起', subtitle: '角柱渐高 · 立面舒展', desc: '檐柱柱头由明间向角部逐渐生起，形成微微上收的柱网轮廓，与深远的屋檐共同构成东大殿稳健、舒展的立面。' },
     { id: 'chashou', title: '叉手托脊', subtitle: '唐构标志', desc: '脊槫由平梁两端斜出的叉手夹持，不用短柱，三角受力、以巧驭重——是判断唐构的重要依据。' },
     { id: 'chuyan', title: '深远出檐', subtitle: '3.96 米', desc: '平缓的大屋顶伸出近 4 米，雨水远抛台基之外，木构与彩塑因此千年不受雨淋潮侵。' },
     { id: 'jinxiang', title: '金厢斗底槽', subtitle: '双圈柱网', desc: '内外两圈柱网以阑额、梁栿拉结成整体，形成刚性极强的殿堂式构架。' },

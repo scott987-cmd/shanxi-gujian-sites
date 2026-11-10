@@ -340,21 +340,21 @@ function addStatues(id: string, g: THREE.Group, m: THREE.Material, h: number) {
 // ============ 牌匾 ============
 export function plaqueMesh(text: string, w: number, h: number, vertical = false): THREE.Mesh {
   const cv = document.createElement('canvas')
-  cv.width = vertical ? 128 : 512
-  cv.height = vertical ? 512 : 128
+  cv.width = vertical ? 256 : 512
+  cv.height = vertical ? text.length * 160 + 80 : 128
   const ctx = cv.getContext('2d')!
   ctx.fillStyle = '#1b1510'
   ctx.fillRect(0, 0, cv.width, cv.height)
-  ctx.strokeStyle = '#c9a227'
+  ctx.strokeStyle = '#a98b48'
   ctx.lineWidth = 10
   ctx.strokeRect(10, 10, cv.width - 20, cv.height - 20)
-  ctx.fillStyle = '#eacd7a'
+  ctx.fillStyle = '#d3bd7a'
   ctx.textAlign = 'center'
   ctx.textBaseline = 'middle'
   if (vertical) {
-    const fs = 92
+    const fs = Math.min(116, Math.floor((cv.height - 80) / text.length * 0.78))
     ctx.font = `900 ${fs}px "Noto Serif SC", "Songti SC", serif`
-    text.split('').forEach((ch, i) => ctx.fillText(ch, 64, 84 + i * 118))
+    text.split('').forEach((ch, i) => ctx.fillText(ch, 128, 40 + (i + 0.5) * 160))
   } else {
     ctx.font = `900 80px "Noto Serif SC", "Songti SC", serif`
     ctx.fillText(text, 256, 70)

@@ -44,7 +44,7 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
   const [spread, setSpread] = useState(0)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [seeThrough, setSeeThrough] = useState(false)
-  const [autoRotate, setAutoRotate] = useState(config.id !== 'qingliansi')
+  const [autoRotate, setAutoRotate] = useState(() => config.id !== 'qingliansi' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const [planSel, setPlanSel] = useState<string | null>(null)
   const [burstTs, setBurstTs] = useState(0)
   const [slowMo, setSlowMo] = useState(false)
@@ -235,8 +235,8 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
                   {tour ? '⏸ 停止巡游' : '🎬 电影巡游'}
                 </button>
                 {config.realisticModel === false ? (
-                  <span className="rounded-full border border-[#6b5f4c] px-4 py-1.5 text-xs text-[#a89c80]" title="当前写实模型未通过形制复核，暂以结构示意呈现">
-                    结构示意 · 写实复核中
+                  <span className="rounded-full border border-[#6b5f4c] px-4 py-1.5 text-xs text-[#a89c80]" title={config.modelLabel ?? '当前使用可拆解的结构示意模型'}>
+                    {config.modelLabel ?? '结构示意 · 写实复核中'}
                   </span>
                 ) : (
                   <button
