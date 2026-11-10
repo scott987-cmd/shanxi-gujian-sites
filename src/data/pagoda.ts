@@ -445,6 +445,13 @@ export interface JointPartInfo {
   name: string
   group: string
   desc: string
+  facts?: string[]
+  joinery?: {
+    title: string
+    connection: string
+    method: string
+    note?: string
+  }
 }
 
 export const JOINT_PARTS: JointPartInfo[] = [

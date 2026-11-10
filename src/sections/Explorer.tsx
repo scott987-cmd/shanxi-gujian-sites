@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { JOINT_PARTS } from '@/data/pagoda'
+import { JOINT_PARTS, type JointPartInfo } from '@/data/pagoda'
 import { JOINT_VARIANT_PARTS } from '@/three/jointVariants'
 import type { BuildingConfig } from '@/sites/types'
 import PagodaCanvas from '@/components/PagodaCanvas'
@@ -96,7 +96,7 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
     config.archetype === 'pagoda' ? PLAN_INFO : config.archetype === 'tower' ? TOWER_PLAN_ZONES : config.archetype === 'cliff' ? CLIFF_PLAN_ZONES : HALL_PLAN_ZONES
   const planInfo = planZones.find((p) => p.id === planSel) ?? null
 
-  const renderRow = (id: string, name: string, tag: string, color: string, desc: string, facts?: string[]) => {
+  const renderRow = (id: string, name: string, tag: string, color: string, desc: string, facts?: string[], joinery?: JointPartInfo['joinery']) => {
     const sel = selectedId === id
     return (
       <div
@@ -124,6 +124,15 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
                   </li>
                 ))}
               </ul>
+            )}
+            {joinery && (
+              <div className="mt-3 rounded-lg border border-[#6b5f4c]/60 bg-[#1d1812]/60 p-3">
+                <div className="text-[10px] tracking-[0.2em] text-[#c9a227]">榫卯衔接</div>
+                <div className="mt-1.5 text-xs font-semibold text-[#e8dcb8]">{joinery.title}</div>
+                <p className="mt-2 text-xs leading-relaxed text-[#cfc4a8]">{joinery.connection}</p>
+                <p className="mt-2 text-[11px] leading-relaxed text-[#a89c80]">剖解说明：{joinery.method}</p>
+                {joinery.note && <p className="mt-2 text-[11px] leading-relaxed text-[#a89c80]">{joinery.note}</p>}
+              </div>
             )}
           </div>
         )}
@@ -321,12 +330,14 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
               <>
                 <div className="flex items-center justify-between border-b border-[#4a4032] px-4 py-3">
                   <span className="font-serif-sc text-sm font-semibold text-[#e8dcb8]">节点构件 · 每块木头</span>
-                  <span className="text-[10px] tracking-wider text-[#8a7f6a]">{JOINT_PARTS.length} 件</span>
+                  <span className="text-[10px] tracking-wider text-[#8a7f6a]">{jointGroups.reduce((sum, group) => sum + group.items.length, 0)} 件</span>
                 </div>
                 <div className="min-h-0 flex-1 overflow-y-auto">
                   {!selectedId && (
                     <div className="border-b border-[#4a4032]/60 px-4 py-3 text-xs leading-relaxed text-[#a89c80]">
-                      左侧是一攒放大的斗拱，右侧是叉柱造。拖动滑杆逐块拆开，点击木头看它的名称与作用。
+                      {config.id === 'foguangsi'
+                        ? '一攒完整的东大殿柱头铺作。拖动滑杆逐件拆开，点击任意栱、昂、斗自动聚焦，并查看榫卯衔接。斗口与半卯为教学剖解，隐蔽榫形不作实测断言。'
+                        : '左侧是一攒放大的斗拱，右侧是叉柱造。拖动滑杆逐块拆开，点击木头看它的名称与作用。'}
                     </div>
                   )}
                   {jointGroups.map((grp) => (
@@ -334,7 +345,7 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
                       <div className="sticky top-0 border-b border-[#4a4032]/60 bg-[#262016] px-4 py-2 text-[10px] tracking-[0.3em] text-[#c9a227]">
                         {grp.name}
                       </div>
-                      {grp.items.map((j) => renderRow(j.id, j.name, '', '#a37a4f', j.desc))}
+                      {grp.items.map((j) => renderRow(j.id, j.name, '', '#a37a4f', j.desc, j.facts, j.joinery))}
                     </div>
                   ))}
                 </div>

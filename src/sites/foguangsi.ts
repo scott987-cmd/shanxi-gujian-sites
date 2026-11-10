@@ -11,7 +11,7 @@ export const foguangsi: BuildingConfig = {
   realisticModel: false,
   modelLabel: '七开间 · 单檐庑殿 · 构件级复原',
   envKind: 'mountain',
-  jointType: 'chashou',
+  jointType: 'foguang-qipuzuo',
   eraMoment: '1937',
   tagline:
     '公元 857 年，唐大中十一年，长安女弟子宁公遇施资、高僧愿诚主持重建。1937 年，梁思成、林徽因循着敦煌壁画《五台山图》的线索找到它，一举打破“中国已无唐代木构”的断言。',

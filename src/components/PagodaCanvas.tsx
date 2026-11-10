@@ -41,6 +41,8 @@ interface CamPreset {
 }
 
 const CAM_JOINT = { pos: new THREE.Vector3(4.5, 8, 18.5), tgt: new THREE.Vector3(0, 5, 0) }
+const CAM_FOGUANG_JOINT = { pos: new THREE.Vector3(5.2, 6.6, 13.2), tgt: new THREE.Vector3(0, 3.8, 1.1) }
+const jointFitScale = (id: string, aspect: number) => Math.max(1, (id === 'foguangsi' ? 0.78 : 1.05) / aspect)
 
 export default function PagodaCanvas({ config, mode, explode, spread, selectedId, onSelect, seeThrough, autoRotate, burstTs, slowMo, realistic, tour }: PagodaCanvasProps) {
   const hostRef = useRef<HTMLDivElement>(null)
@@ -224,9 +226,10 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
       camera.aspect = w / h
       camera.updateProjectionMatrix()
       if (propsRef.current.mode === 'joint') {
-        const fitScale = Math.max(1, 1.05 / camera.aspect)
-        camera.position.copy(CAM_JOINT.pos).sub(CAM_JOINT.tgt).multiplyScalar(fitScale).add(CAM_JOINT.tgt)
-        controls.target.copy(CAM_JOINT.tgt)
+        const preset = config.id === 'foguangsi' ? CAM_FOGUANG_JOINT : CAM_JOINT
+        const fitScale = jointFitScale(config.id, camera.aspect)
+        camera.position.copy(preset.pos).sub(preset.tgt).multiplyScalar(fitScale).add(preset.tgt)
+        controls.target.copy(preset.tgt)
       } else if (config.id === 'foguangsi') {
         const fitScale = Math.max(1, 1.05 / camera.aspect)
         camera.position.copy(cam.pos).sub(cam.tgt).multiplyScalar(fitScale).add(cam.tgt)
@@ -363,7 +366,14 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
         st.particles.points.visible = false
       }
       for (const b of joint.blocks) {
-        b.mesh.position.y = b.baseY + e * b.index * 0.42
+        b.mesh.position.x = (b.baseX ?? b.mesh.position.x) + (b.dx ?? 0) * r
+        b.mesh.position.z = (b.baseZ ?? b.mesh.position.z) + (b.dz ?? 0) * r
+        b.mesh.position.y = b.baseY + e * b.index * (config.id === 'foguangsi' ? 0.34 : 0.42)
+      }
+      if (config.id === 'foguangsi') {
+        joint.group.traverse((object) => {
+          if (object.userData.explodeLabel) object.visible = e < 0.08
+        })
       }
       for (const rp of pagoda.radialParts) {
         rp.mesh.position.x = rp.baseX + rp.dx * rp.amount * r
@@ -374,10 +384,10 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
       for (const m of pagoda.labelMats) m.opacity = labelOp
 
       // 相机随拆解抬升拉远
-      const baseY = p.mode === 'pagoda' ? st.cam.baseY : 5
-      const liftK = p.mode === 'pagoda' ? st.cam.liftK : 2
-      const scaleK = p.mode === 'pagoda' ? st.cam.scaleK : 0.25
-      const want = baseY + e * liftK * 0.5
+      const baseY = p.mode === 'pagoda' ? st.cam.baseY : config.id === 'foguangsi' ? 4.2 : 5
+      const liftK = p.mode === 'pagoda' ? st.cam.liftK : config.id === 'foguangsi' ? 6.4 : 2
+      const scaleK = p.mode === 'pagoda' ? st.cam.scaleK : config.id === 'foguangsi' ? 0.72 : 0.25
+      const want = config.id === 'foguangsi' && p.mode === 'joint' && p.selectedId ? controls.target.y : baseY + e * liftK * 0.5
       controls.target.y += (want - controls.target.y) * 0.06
       const scale = 1 + e * scaleK * 2.2 + r * st.cam.spreadK
       const factor = scale / prevDistScale
@@ -475,9 +485,10 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     if (!st) return
     if (mode === 'joint') {
       // 窄屏横向视野较小，拉远节点相机以保留完整斗拱，而不是裁掉两侧。
-      const fitScale = Math.max(1, 1.05 / st.camera.aspect)
-      st.camera.position.copy(CAM_JOINT.pos).sub(CAM_JOINT.tgt).multiplyScalar(fitScale).add(CAM_JOINT.tgt)
-      st.controls.target.copy(CAM_JOINT.tgt)
+      const preset = config.id === 'foguangsi' ? CAM_FOGUANG_JOINT : CAM_JOINT
+      const fitScale = jointFitScale(config.id, st.camera.aspect)
+      st.camera.position.copy(preset.pos).sub(preset.tgt).multiplyScalar(fitScale).add(preset.tgt)
+      st.controls.target.copy(preset.tgt)
     } else {
       const fitScale = config.id === 'foguangsi' ? Math.max(1, 1.05 / st.camera.aspect) : 1
       st.camera.position.copy(st.cam.pos).sub(st.cam.tgt).multiplyScalar(fitScale).add(st.cam.tgt)
@@ -485,6 +496,28 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     }
     st.controls.update()
   }, [mode])
+
+  // 东大殿：点击单根栱、昂、斗自动聚焦；再次点击后回到整攒。
+  useEffect(() => {
+    const st = stateRef.current
+    if (!st || config.id !== 'foguangsi' || mode !== 'joint') return
+    const block = selectedId ? st.joint.blocks.find((item) => item.id === selectedId) : null
+    if (block) {
+      block.mesh.updateWorldMatrix(true, true)
+      const bounds = new THREE.Box3().setFromObject(block.mesh)
+      const center = bounds.getCenter(new THREE.Vector3())
+      const size = bounds.getSize(new THREE.Vector3())
+      const distance = Math.max(3.2, Math.max(size.x, size.y, size.z) * 3)
+      const direction = new THREE.Vector3(1, 0.45, 1).normalize()
+      st.camera.position.copy(center).addScaledVector(direction, distance)
+      st.controls.target.copy(center)
+    } else {
+      const fitScale = jointFitScale(config.id, st.camera.aspect)
+      st.camera.position.copy(CAM_FOGUANG_JOINT.pos).sub(CAM_FOGUANG_JOINT.tgt).multiplyScalar(fitScale).add(CAM_FOGUANG_JOINT.tgt)
+      st.controls.target.copy(CAM_FOGUANG_JOINT.tgt)
+    }
+    st.controls.update()
+  }, [selectedId, mode])
 
   return <div ref={hostRef} className="h-full w-full cursor-grab active:cursor-grabbing" />
 }

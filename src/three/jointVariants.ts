@@ -2,8 +2,10 @@
 import * as THREE from 'three'
 import { box, cyl, addBlock, merged, buildJoint, textSprite, type JointModel, type JointBlock } from './joint'
 import type { JointPartInfo } from '@/data/pagoda'
+import { FOGUANG_JOINT_PARTS } from '@/data/foguangJoint'
+import { buildFoguangJoint } from './foguangJoint'
 
-export type JointType = 'default' | 'chashou' | 'cliff-beam' | 'glaze' | 'panlong' | 'statue'
+export type JointType = 'default' | 'chashou' | 'foguang-qipuzuo' | 'cliff-beam' | 'glaze' | 'panlong' | 'statue'
 
 const WOOD = 0x8a5a35
 const WOOD_D = 0x66422a
@@ -222,6 +224,8 @@ export function buildJointOf(type: JointType): JointModel {
   switch (type) {
     case 'chashou':
       return buildChashou()
+    case 'foguang-qipuzuo':
+      return buildFoguangJoint()
     case 'cliff-beam':
       return buildCliffBeam()
     case 'glaze':
@@ -238,6 +242,10 @@ export function buildJointOf(type: JointType): JointModel {
 // 目录数据
 export const JOINT_VARIANT_PARTS: Record<JointType, { name: string; parts: JointPartInfo[] }[]> = {
   default: [],
+  'foguang-qipuzuo': Array.from(new Set(FOGUANG_JOINT_PARTS.map((part) => part.group))).map((name) => ({
+    name,
+    parts: FOGUANG_JOINT_PARTS.filter((part) => part.group === name),
+  })),
   chashou: [
     {
       name: '叉手托脊（左）',

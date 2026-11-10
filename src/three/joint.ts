@@ -72,6 +72,10 @@ export interface JointBlock {
   mesh: THREE.Mesh
   baseY: number
   index: number
+  baseX?: number
+  baseZ?: number
+  dx?: number
+  dz?: number
 }
 
 export interface JointModel {
@@ -114,7 +118,7 @@ export function cyl(r: number, h: number, x: number, y: number, z: number, color
 export function addBlock(group: THREE.Group, blocks: JointBlock[], id: string, mesh: THREE.Mesh, index: number) {
   mesh.userData.blockId = id
   group.add(mesh)
-  blocks.push({ id, mesh, baseY: mesh.position.y, index })
+  blocks.push({ id, mesh, baseY: mesh.position.y, baseX: mesh.position.x, baseZ: mesh.position.z, index })
 }
 
 // 组合若干 mesh 为一个 id 的块（返回合并 mesh）
