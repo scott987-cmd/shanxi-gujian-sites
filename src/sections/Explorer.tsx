@@ -44,7 +44,7 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
   const [spread, setSpread] = useState(0)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [seeThrough, setSeeThrough] = useState(false)
-  const [autoRotate, setAutoRotate] = useState(() => config.id !== 'qingliansi' && !window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+  const [autoRotate, setAutoRotate] = useState(() => !['qingliansi', 'foguangsi'].includes(config.id) && !window.matchMedia('(prefers-reduced-motion: reduce)').matches)
   const [planSel, setPlanSel] = useState<string | null>(null)
   const [burstTs, setBurstTs] = useState(0)
   const [slowMo, setSlowMo] = useState(false)
