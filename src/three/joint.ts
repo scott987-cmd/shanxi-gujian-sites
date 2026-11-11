@@ -81,6 +81,8 @@ export interface JointBlock {
 export interface JointModel {
   group: THREE.Group
   blocks: JointBlock[]
+  forceGroup?: THREE.Group
+  forceLinks?: { from: string; to: string; arrow: THREE.ArrowHelper; dot: THREE.Mesh }[]
 }
 
 const WOOD = 0x8a5a35

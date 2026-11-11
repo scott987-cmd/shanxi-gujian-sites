@@ -50,6 +50,10 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
   const [slowMo, setSlowMo] = useState(false)
   const [realistic, setRealistic] = useState(config.realisticModel !== false)
   const [tour, setTour] = useState(false)
+  const [assemblyTs, setAssemblyTs] = useState(0)
+  const [assemblyPlaying, setAssemblyPlaying] = useState(false)
+  const [assemblyStep, setAssemblyStep] = useState(0)
+  const [showForces, setShowForces] = useState(false)
   const rowRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   useEffect(() => {
@@ -58,7 +62,18 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
     }
   }, [selectedId])
 
+  const stopAssembly = () => {
+    setAssemblyPlaying(false)
+    setAssemblyStep(0)
+    setAssemblyTs(0)
+  }
+  const selectComponent = (id: string | null) => {
+    if (config.id === 'foguangsi' && id) stopAssembly()
+    setSelectedId(id)
+  }
   const switchMode = (m: Mode) => {
+    stopAssembly()
+    setShowForces(false)
     setMode(m)
     setSelectedId(null)
     setExplode(0)
@@ -77,6 +92,8 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
           name: g.name,
           items: g.parts.length > 0 ? g.parts : JOINT_PARTS.filter((j) => j.group === '斗拱（左）'),
         }))
+  const jointItems = jointGroups.flatMap((group) => group.items)
+  const currentAssemblyPart = assemblyStep > 0 ? jointItems[Math.min(assemblyStep, jointItems.length) - 1] : null
 
   const TOWER_PLAN_ZONES = [
     { id: 'wall', title: '琉璃外壁', desc: '外壁满贴琉璃构件：佛龛、菩萨、花卉、祥兽，釉彩五百年不褪。' },
@@ -106,7 +123,7 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
         }}
         className={`border-l-2 transition-colors ${sel ? 'border-[#a63d2a] bg-[#a63d2a]/10' : 'border-transparent hover:bg-[#f2ecdf]/5'}`}
       >
-        <button className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left" onClick={() => setSelectedId(sel ? null : id)}>
+        <button className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left" onClick={() => selectComponent(sel ? null : id)}>
           <span className="h-2.5 w-2.5 shrink-0 rounded-sm" style={{ background: color }} />
           <span className={`text-sm ${sel ? 'font-semibold text-[#f2e9d2]' : 'text-[#cfc4a8]'}`}>{name}</span>
           <span className="ml-auto shrink-0 text-[10px] tracking-wider text-[#8a7f6a]">{tag}</span>
@@ -197,9 +214,14 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
                     realistic={realistic}
                     tour={tour}
                     selectedId={selectedId}
-                    onSelect={setSelectedId}
+                    onSelect={selectComponent}
                     seeThrough={seeThrough}
                     autoRotate={autoRotate}
+                    assemblyTs={assemblyTs}
+                    assemblyPlaying={assemblyPlaying}
+                    showForces={showForces}
+                    onAssemblyProgress={setAssemblyStep}
+                    onAssemblyComplete={() => setAssemblyPlaying(false)}
                   />
                 </div>
               )}
@@ -217,7 +239,7 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
                       value={[explode * 100]}
                       max={100}
                       step={1}
-                      onValueChange={([v]) => { setExplode(v / 100); setBurstTs(0) }}
+                      onValueChange={([v]) => { stopAssembly(); setExplode(v / 100); setBurstTs(0) }}
                       className="[&_[data-slot=slider-range]]:bg-[#c9a227] [&_[data-slot=slider-thumb]]:border-[#c9a227]"
                     />
                   </div>
@@ -231,12 +253,44 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
                         value={[spread * 100]}
                         max={100}
                         step={1}
-                        onValueChange={([v]) => { setSpread(v / 100); setBurstTs(0) }}
+                        onValueChange={([v]) => { stopAssembly(); setSpread(v / 100); setBurstTs(0) }}
                         className="[&_[data-slot=slider-range]]:bg-[#a63d2a] [&_[data-slot=slider-thumb]]:border-[#a63d2a]"
                       />
                     </div>
                   )}
                 </div>
+                {mode === 'joint' && config.id === 'foguangsi' && (
+                  <>
+                    <button
+                      aria-pressed={assemblyPlaying}
+                      onClick={() => {
+                        if (assemblyPlaying) {
+                          setAssemblyPlaying(false)
+                          return
+                        }
+                        setSelectedId(null)
+                        setExplode(0)
+                        setSpread(0)
+                        setBurstTs(0)
+                        if (assemblyStep === 0 || assemblyStep >= jointItems.length) {
+                          setAssemblyTs(Date.now())
+                          setAssemblyStep(0)
+                        }
+                        setAssemblyPlaying(true)
+                      }}
+                      className={`rounded-full border px-4 py-1.5 text-xs transition ${assemblyPlaying ? 'border-[#c9a227] bg-[#c9a227]/15 text-[#e8dcb8]' : 'border-[#6b5f4c] text-[#a89c80] hover:border-[#c9a227]'}`}
+                    >
+                      {assemblyPlaying ? '暂停安装' : assemblyStep >= jointItems.length ? '重新安装' : assemblyStep > 0 ? '继续安装' : '安装顺序'}
+                    </button>
+                    <button
+                      aria-pressed={showForces}
+                      onClick={() => setShowForces(!showForces)}
+                      className={`rounded-full border px-4 py-1.5 text-xs transition ${showForces ? 'border-[#c9a227] bg-[#c9a227]/15 text-[#e8dcb8]' : 'border-[#6b5f4c] text-[#a89c80] hover:border-[#c9a227]'}`}
+                    >
+                      {showForces ? '隐藏受力路径' : '受力路径'}
+                    </button>
+                  </>
+                )}
                 <button
                   onClick={() => setTour(!tour)}
                   className={`rounded-full border px-4 py-1.5 text-xs transition ${tour ? 'border-[#c9a227] bg-[#c9a227]/15 text-[#e8dcb8]' : 'border-[#6b5f4c] text-[#a89c80] hover:border-[#c9a227]'}`}
@@ -263,6 +317,7 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
                 </button>
                 <button
                   onClick={() => {
+                    stopAssembly()
                     setExplode(1)
                     setSpread(1)
                     setBurstTs(Date.now())
@@ -273,6 +328,7 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
                 </button>
                 <button
                   onClick={() => {
+                    stopAssembly()
                     setExplode(0)
                     setSpread(0)
                     setBurstTs(0)
@@ -299,6 +355,25 @@ export default function Explorer({ config }: { config: BuildingConfig }) {
                     {seeThrough ? '✓ 透视墙体中' : '透视墙体看内部'}
                   </button>
                 )}
+              </div>
+            )}
+            {mode === 'joint' && config.id === 'foguangsi' && (assemblyPlaying || assemblyStep > 0) && (
+              <div className="mt-3 rounded-xl border border-[#4a4032] bg-[#1d1812]/70 px-4 py-3">
+                <div className="flex items-center justify-between text-xs text-[#cfc4a8]">
+                  <span>{assemblyStep >= jointItems.length ? '安装完成' : assemblyPlaying ? '正在安装' : '安装已暂停'}</span>
+                  <span className="text-[#c9a227]">{assemblyStep} / {jointItems.length}</span>
+                </div>
+                <div className="mt-2 h-1 overflow-hidden rounded-full bg-[#4a4032]" role="progressbar" aria-valuemin={0} aria-valuemax={jointItems.length} aria-valuenow={assemblyStep}>
+                  <div className="h-full rounded-full bg-[#c9a227] transition-[width] duration-200" style={{ width: `${assemblyStep / jointItems.length * 100}%` }} />
+                </div>
+                <p className="mt-2 text-[11px] leading-relaxed text-[#a89c80]">
+                  {assemblyStep >= jointItems.length ? '全部构件已落位，可开启受力路径。' : currentAssemblyPart ? `当前：${currentAssemblyPart.name}` : '从柱头与栌斗开始安装。'}
+                </p>
+              </div>
+            )}
+            {mode === 'joint' && config.id === 'foguangsi' && showForces && (
+              <div className="mt-3 rounded-xl border border-[#c9a227]/35 bg-[#c9a227]/5 px-4 py-3 text-[11px] leading-relaxed text-[#d7c99f]">
+                金色箭头与光点：檐椽 → 撩檐槫 → 斗拱 → 柱头。构造关系示意，非应力计算。
               </div>
             )}
           </div>

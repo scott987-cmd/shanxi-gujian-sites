@@ -193,6 +193,22 @@ export function buildFoguangJoint(): JointModel {
   note.position.set(0, 7.85, -0.3)
   note.userData.explodeLabel = true
   assembly.add(note)
+  // 主传力路径的构造关系示意；不表达应力大小或结构计算结果。
+  const forceSequence = [
+    'fq-rafter', 'fq-liaoyan', 'fq-timu', 'fq-qixin', 'fq-ling', 'fq-jh4',
+    'fq-ang2', 'fq-jh3', 'fq-ang1', 'fq-jh2', 'fq-hua2', 'fq-jh1',
+    'fq-hua1', 'fq-ludou', 'fq-col',
+  ]
+  const forceGroup = new THREE.Group()
+  forceGroup.visible = false
+  const forceLinks = forceSequence.slice(1).map((to, index) => {
+    const arrow = new THREE.ArrowHelper(new THREE.Vector3(0, -1, 0), new THREE.Vector3(), 1, 0xe7b73e, 0.2, 0.13)
+    const dot = new THREE.Mesh(new THREE.SphereGeometry(0.075, 12, 8), new THREE.MeshBasicMaterial({ color: 0xffd66b, depthTest: false, transparent: true, opacity: 0.96 }))
+    dot.renderOrder = 3
+    forceGroup.add(arrow, dot)
+    return { from: forceSequence[index], to, arrow, dot }
+  })
+  assembly.add(forceGroup)
   group.add(assembly)
-  return { group, blocks }
+  return { group, blocks, forceGroup, forceLinks }
 }

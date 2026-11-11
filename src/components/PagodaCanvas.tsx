@@ -28,6 +28,11 @@ export interface PagodaCanvasProps {
   slowMo: boolean
   realistic: boolean
   tour: boolean
+  assemblyTs: number
+  assemblyPlaying: boolean
+  showForces: boolean
+  onAssemblyProgress: (step: number) => void
+  onAssemblyComplete: () => void
 }
 
 interface CamPreset {
@@ -44,7 +49,7 @@ const CAM_JOINT = { pos: new THREE.Vector3(4.5, 8, 18.5), tgt: new THREE.Vector3
 const CAM_FOGUANG_JOINT = { pos: new THREE.Vector3(5.2, 6.6, 13.2), tgt: new THREE.Vector3(0, 3.8, 1.1) }
 const jointFitScale = (id: string, aspect: number) => Math.max(1, (id === 'foguangsi' ? 0.78 : 1.05) / aspect)
 
-export default function PagodaCanvas({ config, mode, explode, spread, selectedId, onSelect, seeThrough, autoRotate, burstTs, slowMo, realistic, tour }: PagodaCanvasProps) {
+export default function PagodaCanvas({ config, mode, explode, spread, selectedId, onSelect, seeThrough, autoRotate, burstTs, slowMo, realistic, tour, assemblyTs, assemblyPlaying, showForces, onAssemblyProgress, onAssemblyComplete }: PagodaCanvasProps) {
   const hostRef = useRef<HTMLDivElement>(null)
   const stateRef = useRef<{
     renderer: THREE.WebGLRenderer
@@ -64,9 +69,10 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     particles: ParticleBurst | null
   } | null>(null)
   const burstRef = useRef<{ active: boolean; t: number }>({ active: false, t: 0 })
+  const assemblyRef = useRef<{ time: number | null; lastStep: number; completed: boolean }>({ time: null, lastStep: 0, completed: false })
 
-  const propsRef = useRef({ mode, explode, spread, selectedId, seeThrough, autoRotate, onSelect, slowMo, realistic, tour })
-  propsRef.current = { mode, explode, spread, selectedId, seeThrough, autoRotate, onSelect, slowMo, realistic, tour }
+  const propsRef = useRef({ mode, explode, spread, selectedId, seeThrough, autoRotate, onSelect, slowMo, realistic, tour, assemblyPlaying, showForces, onAssemblyProgress, onAssemblyComplete })
+  propsRef.current = { mode, explode, spread, selectedId, seeThrough, autoRotate, onSelect, slowMo, realistic, tour, assemblyPlaying, showForces, onAssemblyProgress, onAssemblyComplete }
 
   // 初始化（仅一次）
   useEffect(() => {
@@ -289,6 +295,7 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
       raf = requestAnimationFrame(tick)
       const p = propsRef.current
       const st = stateRef.current!
+      const delta = Math.min(clock.getDelta(), 0.06)
 
       if (st.realModel && !st.realScaled) {
         fitToHeight(st.realModel, realTargetHeight)
@@ -345,8 +352,43 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
         st.explodeCur += (p.explode - st.explodeCur) * 0.09
         st.radialCur += (p.spread - st.radialCur) * 0.09
       }
-      const e = st.explodeCur
-      const r = st.radialCur
+      const assembling = config.id === 'foguangsi' && p.mode === 'joint' && assemblyRef.current.time !== null
+      if (assembling) {
+        const sequence = assemblyRef.current
+        const stepDuration = 0.55
+        const totalTime = joint.blocks.length * stepDuration
+        if (p.assemblyPlaying && !sequence.completed) {
+          sequence.time = Math.min(totalTime, sequence.time! + delta * (slowMo ? 0.5 : 1))
+        }
+        const time = sequence.time!
+        const step = Math.min(joint.blocks.length, Math.floor(time / stepDuration))
+        if (step !== sequence.lastStep) {
+          sequence.lastStep = step
+          p.onAssemblyProgress(step)
+        }
+        if (time >= totalTime && !sequence.completed) {
+          sequence.completed = true
+          p.onAssemblyComplete()
+        }
+        for (const b of joint.blocks) {
+          const local = time - b.index * stepDuration
+          if (local < 0) {
+            b.mesh.visible = false
+            continue
+          }
+          b.mesh.visible = true
+          const t = Math.min(1, local / stepDuration)
+          const ease = 1 - Math.pow(1 - t, 3)
+          const remaining = 1 - ease
+          b.mesh.position.set(
+            (b.baseX ?? 0) + (b.dx ?? 0) * 0.35 * remaining,
+            b.baseY + remaining * (1.4 + (b.index % 3) * 0.4),
+            (b.baseZ ?? 0) + ((b.dz ?? 0) * 0.35 + 0.6) * remaining,
+          )
+        }
+      }
+      const e = assembling ? 0 : st.explodeCur
+      const r = assembling ? 0 : st.radialCur
       // 错峰解构：自上而下依次分离，每层错峰升起
       const nL = pagoda.layers.length
       for (const l of pagoda.layers) {
@@ -365,12 +407,44 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
       } else if (st.particles && !burstRef.current.active) {
         st.particles.points.visible = false
       }
-      for (const b of joint.blocks) {
-        b.mesh.position.x = (b.baseX ?? b.mesh.position.x) + (b.dx ?? 0) * r
-        b.mesh.position.z = (b.baseZ ?? b.mesh.position.z) + (b.dz ?? 0) * r
-        b.mesh.position.y = b.baseY + e * b.index * (config.id === 'foguangsi' ? 0.34 : 0.42)
+      if (!assembling) {
+        for (const b of joint.blocks) {
+          b.mesh.visible = true
+          b.mesh.position.x = (b.baseX ?? b.mesh.position.x) + (b.dx ?? 0) * r
+          b.mesh.position.z = (b.baseZ ?? b.mesh.position.z) + (b.dz ?? 0) * r
+          b.mesh.position.y = b.baseY + e * b.index * (config.id === 'foguangsi' ? 0.34 : 0.42)
+        }
       }
       if (config.id === 'foguangsi') {
+        const forceVisible = p.showForces && p.mode === 'joint'
+        if (joint.forceGroup) joint.forceGroup.visible = forceVisible
+        if (joint.forceLinks) {
+          const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+          const flowTime = reducedMotion ? 0 : performance.now() / 1000
+          joint.forceLinks.forEach((link, index) => {
+            const from = joint.blocks.find((block) => block.id === link.from)
+            const to = joint.blocks.find((block) => block.id === link.to)
+            if (!from || !to) return
+            const visible = forceVisible && from.mesh.visible && to.mesh.visible
+            link.arrow.visible = visible
+            link.dot.visible = visible
+            if (!visible) return
+            const start = from.mesh.getWorldPosition(new THREE.Vector3())
+            const end = to.mesh.getWorldPosition(new THREE.Vector3())
+            const direction = start.clone().sub(end)
+            const length = direction.length()
+            if (length < 0.001) {
+              link.arrow.visible = false
+              link.dot.visible = false
+              return
+            }
+            link.arrow.position.copy(end)
+            link.arrow.setDirection(direction.normalize())
+            link.arrow.setLength(length, Math.min(0.2, length * 0.3), Math.min(0.13, length * 0.25))
+            const progress = reducedMotion ? 0.5 : (flowTime * 0.65 + index * 0.17) % 1
+            link.dot.position.copy(end).lerp(start, progress)
+          })
+        }
         joint.group.traverse((object) => {
           if (object.userData.explodeLabel) object.visible = e < 0.08
         })
@@ -431,7 +505,7 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
 
       // 电影巡游：缓入缓出的环绕镜头
       if (p.tour && p.mode === 'pagoda') {
-        tourTime += Math.min(clock.getDelta(), 0.06)
+        tourTime += delta
         const wps = tourWaypoints(st.cam)
         const leg = 6
         const idx = Math.floor(tourTime / leg) % wps.length
@@ -479,6 +553,17 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     }
   }, [burstTs])
 
+  // 安装顺序：新播放从零开始；手动操作时退出安装模式。
+  useEffect(() => {
+    assemblyRef.current = { time: assemblyTs > 0 ? 0 : null, lastStep: 0, completed: false }
+    const st = stateRef.current
+    if (st) {
+      st.explodeCur = 0
+      st.radialCur = 0
+      burstRef.current.active = false
+    }
+  }, [assemblyTs])
+
   // 模式切换：相机跳位
   useEffect(() => {
     const st = stateRef.current
@@ -503,6 +588,7 @@ export default function PagodaCanvas({ config, mode, explode, spread, selectedId
     if (!st || config.id !== 'foguangsi' || mode !== 'joint') return
     const block = selectedId ? st.joint.blocks.find((item) => item.id === selectedId) : null
     if (block) {
+      assemblyRef.current.time = null
       block.mesh.updateWorldMatrix(true, true)
       const bounds = new THREE.Box3().setFromObject(block.mesh)
       const center = bounds.getCenter(new THREE.Vector3())
